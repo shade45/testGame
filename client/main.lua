@@ -1,6 +1,12 @@
 --Libraries
 require("libs/lovelyMoon/stateManager")
 require("libs/lovelyMoon/lovelyMoon")
+
+smallFont = 	love.graphics.newFont("fonts/visitor1.ttf",10)
+defaultFont = 	love.graphics.newFont("fonts/bitmap1.ttf",16)	
+bigFont = 		love.graphics.newFont("fonts/visitor1.ttf",30)
+debugFont = 	love.graphics.newFont("fonts/visitor1.ttf",10)
+
 require("libs/loveframes/init")
 
 playerName = ""
@@ -14,9 +20,8 @@ require("states/color/colorState")
 winX = 800
 winY = 600
 g = love.graphics
-defaultFont = 	love.graphics.newFont("fonts/bitmap2.ttf",16)	
-bigFont = 		love.graphics.newFont("fonts/bitmap2.ttf",26)
-debugFont = 	love.graphics.newFont("fonts/visitor1.ttf",10)
+textColor = {94,94,104}
+inputBodyColor = {128,136,145}
 
 DEBUG = false
 
@@ -47,8 +52,7 @@ function love.draw()
 		love.graphics.print("FPS: " .. love.timer.getFPS(), 0, 0)
 		love.graphics.print("Name: " .. playerName, 0, 8)	
 		love.graphics.print("Color: " .. playerColor[1] .. "," .. playerColor[2] .. "," .. playerColor[3], 0, 16)			
-		love.graphics.print("players: just you...", 0, 24)	
-		love.graphics.print("loveframes state: " .. loveframes.GetState(), 0, 32)	
+		love.graphics.print("players: just you...", 0, 24)		
 		love.graphics.setFont(defaultFont)
 	end
 	

@@ -10,7 +10,7 @@ function Slider:new()
 		value = 50,
 		color = {100,100,100},
 		align = "center",
-		thick = 8,
+		thick = 10,
 		active = false,
 		onChange = nil
 	}	

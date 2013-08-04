@@ -893,7 +893,7 @@ function skin.DrawTextInput(object)
 	local linenumbers = object:GetLineNumbersEnabled()
 	local itemwidth = object:GetItemWidth()
 	local theight = font:getHeight("a")
-	local bodycolor = skin.controls.textinput_body_color
+	local bodycolor = inputBodyColor
 	local textnormalcolor = skin.controls.textinput_text_normal_color
 	local textselectedcolor = skin.controls.textinput_text_selected_color
 	local highlightbarcolor = skin.controls.textinput_highlight_bar_color
@@ -1005,7 +1005,7 @@ function skin.DrawOverTextInput(object)
 	local width = object:GetWidth()
 	local height = object:GetHeight()
 	
-	love.graphics.setColor(bordercolor)
+	love.graphics.setColor(inputBodyColor)
 	skin.OutlinedRectangle(x, y, width, height)
 	
 end

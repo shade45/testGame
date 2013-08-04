@@ -39,7 +39,7 @@ end
 --Draw
 function GameState:draw()
 	love.graphics.setFont(bigFont)
-	love.graphics.setColor({255,255,255})
+	love.graphics.setColor(textColor)
 	love.graphics.printf("Congratulations, you're a faggot, Harry!", winX/2 - 250, winY/2 - 20, 500, "center")
 end
 

@@ -1,4 +1,4 @@
---Example of a GameState file
+require("utils/guiElements")
 
 --Table
 NameState = {}
@@ -18,7 +18,7 @@ end
 
 --Load
 function NameState:load()
-	background = love.graphics.newImage("states/name/pattern4.png")
+	gE = guiElements:new()
 	
 	enterText = "Enter your name:"
 		
@@ -31,12 +31,12 @@ function NameState:load()
 		playerName = object:GetText()
 	end
 	
-	button = loveframes.Create("button")
-	button:SetSize(50, 20)
-	button:SetPos((winX-50)/2, winY/2 + 50)
-	button:SetText("OK")
-	button:SetState("name")
-	button.OnClick = function(object)
+	button = gE:newButton()
+	button:setSize(100, 20)
+	button:setPos((winX)/2, winY/2 + 50)
+	button:setText("OK")
+	button:setFont(love.graphics.newFont("fonts/visitor1.ttf", 20))
+	button.onClick = function()
 		if textinput:GetText() == "" then
 			enterText = "I said enter your FUCKING name:"
 		else 
@@ -45,6 +45,7 @@ function NameState:load()
 			disableState("name")
 		end
 	end
+
 end
 
 --Close
@@ -63,16 +64,18 @@ end
 
 --Update
 function NameState:update(dt)
+	gE:update(dt)
 end
 
 --Draw
 function NameState:draw()
-	love.graphics.setColor(255,255,255)
-	love.graphics.draw(background, 0, 0)	
+	love.graphics.setBackgroundColor(48,53,59)	
 	love.graphics.setFont(bigFont)
-	love.graphics.printf(enterText, winX/2 - 250, winY/2 - 50, 500, "center")
+	love.graphics.setColor(textColor)
+	love.graphics.printf(enterText, winX/2 - 300, winY/2 - 50, 600, "center")
 	love.graphics.setFont(defaultFont)
 	loveframes.draw()
+	gE:draw()
 end
 
 --KeyPressed
@@ -85,9 +88,11 @@ end
 
 --MousePressed
 function NameState:mousepressed(x, y, button)
+	gE:mousepressed(x, y, button)
 end
 
 --MouseReleased
 function NameState:mousereleased(x, y, button)
+	gE:mousereleased(x, y, button)
 end
 
