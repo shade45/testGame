@@ -1,22 +1,22 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- panel class
-panel = class("panel", base)
+local newobject = loveframes.NewObject("panel", "loveframes_object_panel", true)
 
 --[[---------------------------------------------------------
 	- func: initialize()
 	- desc: initializes the object
 --]]---------------------------------------------------------
-function panel:initialize()
+function newobject:initialize()
 	
-	self.type           = "panel"
-	self.width          = 200
-	self.height         = 50
-	self.internal       = false
-	self.children       = {}
+	self.type = "panel"
+	self.width = 200
+	self.height = 50
+	self.internal = false
+	self.children = {}
 	
 end
 
@@ -24,7 +24,14 @@ end
 	- func: update(deltatime)
 	- desc: updates the element
 --]]---------------------------------------------------------
-function panel:update(dt)
+function newobject:update(dt)
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	local alwaysupdate = self.alwaysupdate
@@ -36,9 +43,9 @@ function panel:update(dt)
 	end
 	
 	local children = self.children
-	local parent   = self.parent
-	local base     = loveframes.base
-	local update   = self.Update
+	local parent = self.parent
+	local base = loveframes.base
+	local update = self.Update
 	
 	-- move to parent if there is a parent
 	if parent ~= base and parent.type ~= "list" then
@@ -62,7 +69,14 @@ end
 	- func: draw()
 	- desc: draws the object
 --]]---------------------------------------------------------
-function panel:draw()
+function newobject:draw()
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	
@@ -70,15 +84,15 @@ function panel:draw()
 		return
 	end
 	
-	local children      = self.children
-	local skins         = loveframes.skins.available
-	local skinindex     = loveframes.config["ACTIVESKIN"]
-	local defaultskin   = loveframes.config["DEFAULTSKIN"]
-	local selfskin      = self.skin
-	local skin          = skins[selfskin] or skins[skinindex]
-	local drawfunc      = skin.DrawPanel or skins[defaultskin].DrawPanel
-	local draw          = self.Draw
-	local drawcount     = loveframes.drawcount
+	local children = self.children
+	local skins = loveframes.skins.available
+	local skinindex = loveframes.config["ACTIVESKIN"]
+	local defaultskin = loveframes.config["DEFAULTSKIN"]
+	local selfskin = self.skin
+	local skin = skins[selfskin] or skins[skinindex]
+	local drawfunc = skin.DrawPanel or skins[defaultskin].DrawPanel
+	local draw = self.Draw
+	local drawcount = loveframes.drawcount
 	
 	-- set the object's draw order
 	self:SetDrawOrder()
@@ -100,8 +114,15 @@ end
 	- func: mousepressed(x, y, button)
 	- desc: called when the player presses a mouse button
 --]]---------------------------------------------------------
-function panel:mousepressed(x, y, button)
+function newobject:mousepressed(x, y, button)
 
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
 	local visible = self.visible
 	
 	if not visible then
@@ -109,16 +130,13 @@ function panel:mousepressed(x, y, button)
 	end
 	
 	local children = self.children
-	local hover    = self.hover
+	local hover = self.hover
 	
 	if hover and button == "l" then
-	
 		local baseparent = self:GetBaseParent()
-	
 		if baseparent and baseparent.type == "frame" then
 			baseparent:MakeTop()
 		end
-		
 	end
 	
 	for k, v in ipairs(children) do
@@ -131,8 +149,15 @@ end
 	- func: mousereleased(x, y, button)
 	- desc: called when the player releases a mouse button
 --]]---------------------------------------------------------
-function panel:mousereleased(x, y, button)
+function newobject:mousereleased(x, y, button)
 
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
 	local visible  = self.visible
 	local children = self.children
 	

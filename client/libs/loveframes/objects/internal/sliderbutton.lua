@@ -1,31 +1,31 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- sliderbutton class
-sliderbutton = class("sliderbutton", base)
+local newobject = loveframes.NewObject("sliderbutton", "loveframes_object_sliderbutton", true)
 
 --[[---------------------------------------------------------
 	- func: initialize()
 	- desc: initializes the object
 --]]---------------------------------------------------------
-function sliderbutton:initialize(parent)
+function newobject:initialize(parent)
 
-	self.type           = "sliderbutton"
-	self.width          = 10
-	self.height         = 20
-	self.staticx        = 0
-	self.staticy        = 0
-	self.startx         = 0
-	self.clickx         = 0
-	self.starty         = 0
-	self.clicky         = 0
-	self.intervals      = true
-	self.internal       = true
-	self.down           = false
-	self.dragging       = false
-	self.parent         = parent
+	self.type = "sliderbutton"
+	self.width = 10
+	self.height = 20
+	self.staticx = 0
+	self.staticy = 0
+	self.startx = 0
+	self.clickx = 0
+	self.starty = 0
+	self.clicky = 0
+	self.intervals = true
+	self.internal = true
+	self.down = false
+	self.dragging = false
+	self.parent = parent
 	
 	-- apply template properties to the object
 	loveframes.templates.ApplyToObject(self)
@@ -36,9 +36,9 @@ end
 	- func: update(deltatime)
 	- desc: updates the object
 --]]---------------------------------------------------------
-function sliderbutton:update(dt)
+function newobject:update(dt)
 	
-	local visible      = self.visible
+	local visible = self.visible
 	local alwaysupdate = self.alwaysupdate
 	
 	if not visible then
@@ -49,23 +49,25 @@ function sliderbutton:update(dt)
 	
 	self:CheckHover()
 	
-	local x, y          = love.mouse.getPosition()
-	local intervals     = self.intervals
-	local progress      = 0
-	local nvalue        = 0
-	local pvalue        = self.parent.value
-	local hover         = self.hover
-	local down          = self.down
-	local hoverobject   = loveframes.hoverobject
-	local parent        = self.parent
-	local slidetype     = parent.slidetype
-	local dragging      = self.dragging
-	local parent        = self.parent
-	local base          = loveframes.base
-	local update        = self.Update
+	local x, y = love.mouse.getPosition()
+	local intervals = self.intervals
+	local progress = 0
+	local nvalue = 0
+	local pvalue = self.parent.value
+	local hover = self.hover
+	local down = self.down
+	local hoverobject = loveframes.hoverobject
+	local parent = self.parent
+	local slidetype = parent.slidetype
+	local dragging = self.dragging
+	local base = loveframes.base
+	local update = self.Update
 	
 	if not hover then
 		self.down = false
+		if hoverobject == self then
+			self.hover = true
+		end
 	else
 		if hoverobject == self then
 			self.down = true
@@ -84,49 +86,37 @@ function sliderbutton:update(dt)
 	
 	-- start calculations if the button is being dragged
 	if dragging then
-	
 		-- calculations for horizontal sliders
 		if slidetype == "horizontal" then
-			
-			self.staticx 		= self.startx + (x - self.clickx)
-		
-			progress 			= self.staticx/(self.parent.width - self.width)
-			nvalue 				= self.parent.min + (self.parent.max - self.parent.min) * progress
-			nvalue 				= loveframes.util.Round(nvalue, self.parent.decimals)
-		
+			self.staticx = self.startx + (x - self.clickx)
+			progress = self.staticx/(self.parent.width - self.width)
+			nvalue = self.parent.min + (self.parent.max - self.parent.min) * progress
+			nvalue = loveframes.util.Round(nvalue, self.parent.decimals)
 		-- calculations for vertical sliders
 		elseif slidetype == "vertical" then
-			
-			self.staticy 		= self.starty + (y - self.clicky)
-		
-			local space 		= self.parent.height - self.height
-			local remaining 	= (self.parent.height - self.height) - self.staticy
-			local percent 		=  remaining/space
-			
-			nvalue 				= self.parent.min + (self.parent.max - self.parent.min) * percent
-			nvalue 				= loveframes.util.Round(nvalue, self.parent.decimals)
-			
+			self.staticy = self.starty + (y - self.clicky)
+			local space = self.parent.height - self.height
+			local remaining = (self.parent.height - self.height) - self.staticy
+			local percent =  remaining/space
+			nvalue = self.parent.min + (self.parent.max - self.parent.min) * percent
+			nvalue = loveframes.util.Round(nvalue, self.parent.decimals)
 		end
-		
-		-- 
 		if nvalue > self.parent.max then
 			nvalue = self.parent.max
 		end
-			
 		if nvalue < self.parent.min then
 			nvalue = self.parent.min
 		end
-		
 		self.parent.value = nvalue
-		
+		if self.parent.value == -0 then
+			self.parent.value = math.abs(self.parent.value)
+		end
 		if nvalue ~= pvalue and nvalue >= self.parent.min and nvalue <= self.parent.max then
 			if self.parent.OnValueChanged then
 				self.parent.OnValueChanged(self.parent, self.parent.value)
 			end
 		end
-	
 		loveframes.hoverobject = self
-		
 	end
 	
 	if slidetype == "horizontal" then
@@ -157,7 +147,7 @@ end
 	- func: draw()
 	- desc: draws the object
 --]]---------------------------------------------------------
-function sliderbutton:draw()
+function newobject:draw()
 	
 	local visible = self.visible
 	
@@ -165,14 +155,14 @@ function sliderbutton:draw()
 		return
 	end
 	
-	local skins         = loveframes.skins.available
-	local skinindex     = loveframes.config["ACTIVESKIN"]
-	local defaultskin   = loveframes.config["DEFAULTSKIN"]
-	local selfskin      = self.skin
-	local skin          = skins[selfskin] or skins[skinindex]
-	local drawfunc      = skin.DrawSliderButton or skins[defaultskin].DrawSliderButton
-	local draw          = self.Draw
-	local drawcount     = loveframes.drawcount
+	local skins = loveframes.skins.available
+	local skinindex = loveframes.config["ACTIVESKIN"]
+	local defaultskin = loveframes.config["DEFAULTSKIN"]
+	local selfskin = self.skin
+	local skin = skins[selfskin] or skins[skinindex]
+	local drawfunc = skin.DrawSliderButton or skins[defaultskin].DrawSliderButton
+	local draw = self.Draw
+	local drawcount = loveframes.drawcount
 	
 	-- set the object's draw order
 	self:SetDrawOrder()
@@ -189,7 +179,7 @@ end
 	- func: mousepressed(x, y, button)
 	- desc: called when the player presses a mouse button
 --]]---------------------------------------------------------
-function sliderbutton:mousepressed(x, y, button)
+function newobject:mousepressed(x, y, button)
 	
 	local visible = self.visible
 	
@@ -200,21 +190,17 @@ function sliderbutton:mousepressed(x, y, button)
 	local hover = self.hover
 	
 	if hover and button == "l" then
-	
 		local baseparent = self:GetBaseParent()
-		
 		if baseparent and baseparent.type == "frame" then
 			baseparent:MakeTop()
 		end
-		
-		self.down              = true
-		self.dragging          = true
-		self.startx            = self.staticx
-		self.clickx            = x
-		self.starty            = self.staticy
-		self.clicky            = y
+		self.down = true
+		self.dragging = true
+		self.startx = self.staticx
+		self.clickx = x
+		self.starty = self.staticy
+		self.clicky = y
 		loveframes.hoverobject = self
-		
 	end
 	
 end
@@ -223,12 +209,23 @@ end
 	- func: mousereleased(x, y, button)
 	- desc: called when the player releases a mouse button
 --]]---------------------------------------------------------
-function sliderbutton:mousereleased(x, y, button)
+function newobject:mousereleased(x, y, button)
 	
 	local visible = self.visible
 	
 	if not visible then
 		return
+	end
+	
+	local down = self.down
+	local dragging = self.dragging
+	
+	if dragging then
+		local parent = self.parent
+		local onrelease = parent.OnRelease
+		if onrelease then
+			onrelease(parent)
+		end
 	end
 	
 	self.down = false
@@ -240,7 +237,7 @@ end
 	- func: MoveToX(x)
 	- desc: moves the object to the specified x position
 --]]---------------------------------------------------------
-function sliderbutton:MoveToX(x)
+function newobject:MoveToX(x)
 
 	self.staticx = x
 	
@@ -250,7 +247,7 @@ end
 	- func: MoveToY(y)
 	- desc: moves the object to the specified y position
 --]]---------------------------------------------------------
-function sliderbutton:MoveToY(y)
+function newobject:MoveToY(y)
 
 	self.staticy = y
 	

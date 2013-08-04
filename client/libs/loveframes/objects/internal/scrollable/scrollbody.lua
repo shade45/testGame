@@ -1,92 +1,111 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- scrollbar class
-scrollbody = class("scrollbody", base)
+local newobject = loveframes.NewObject("scrollbody", "loveframes_object_scrollbody", true)
 
 --[[---------------------------------------------------------
 	- func: initialize()
 	- desc: initializes the object
 --]]---------------------------------------------------------
-function scrollbody:initialize(parent, bartype)
+function newobject:initialize(parent, bartype)
 	
-	self.type           = "scrollbody"
-	self.bartype        = bartype
-	self.parent         = parent
-	self.x              = 0
-	self.y              = 0
-	self.internal       = true
-	self.internals      = {}
+	self.type = "scrollbody"
+	self.bartype = bartype
+	self.parent = parent
+	self.x = 0
+	self.y = 0
+	self.internal = true
+	self.internals = {}
 	
 	if self.bartype == "vertical" then
-		self.width      = 16
-		self.height     = self.parent.height
-		self.staticx    = self.parent.width - self.width
-		self.staticy    = 0
+		self.width = 16
+		self.height = self.parent.height
+		self.staticx = self.parent.width - self.width
+		self.staticy = 0
 	elseif self.bartype == "horizontal" then
-		self.width      = self.parent.width
-		self.height     = 16
-		self.staticx    = 0
-		self.staticy    = self.parent.height - self.height
+		self.width = self.parent.width
+		self.height = 16
+		self.staticx = 0
+		self.staticy = self.parent.height - self.height
 	end
 	
-	table.insert(self.internals, scrollarea:new(self, bartype))
+	table.insert(self.internals, loveframes.objects["scrollarea"]:new(self, bartype))
 	
 	local bar = self.internals[1].internals[1]
 	
 	if self.bartype == "vertical" then 
-	
-		local upbutton          = scrollbutton:new("up")
-		upbutton.parent         = self
+		local upbutton = loveframes.objects["scrollbutton"]:new("up")
+		upbutton.parent = self
 		upbutton.Update	= function(object, dt)
 			upbutton.staticx = 0 + self.width - upbutton.width
 			upbutton.staticy = 0
 			if object.down and object.hover then
-				bar:Scroll(-self.parent.buttonscrollamount)
+				local dtscrolling = self.parent.dtscrolling
+				if dtscrolling then
+					local dt = love.timer.getDelta()
+					bar:Scroll(-self.parent.buttonscrollamount * dt)
+				else
+					bar:Scroll(-self.parent.buttonscrollamount)
+				end
 			end
 		end
-			
-		local downbutton        = scrollbutton:new("down")
-		downbutton.parent       = self
+		local downbutton = loveframes.objects["scrollbutton"]:new("down")
+		downbutton.parent = self
 		downbutton.Update = function(object, dt)
 			downbutton.staticx = 0 + self.width - downbutton.width
 			downbutton.staticy = 0 + self.height - downbutton.height
 			if object.down and object.hover then
-				bar:Scroll(self.parent.buttonscrollamount)
+				local dtscrolling = self.parent.dtscrolling
+				if dtscrolling then
+					local dt = love.timer.getDelta()
+					bar:Scroll(self.parent.buttonscrollamount * dt)
+				else
+					bar:Scroll(self.parent.buttonscrollamount)
+				end
 			end
 		end
-		
 		table.insert(self.internals, upbutton)
 		table.insert(self.internals, downbutton)
-		
 	elseif self.bartype == "horizontal" then
-		
-		local leftbutton        = scrollbutton:new("left")
-		leftbutton.parent       = self
+		local leftbutton = loveframes.objects["scrollbutton"]:new("left")
+		leftbutton.parent = self
 		leftbutton.Update = function(object, dt)
 			leftbutton.staticx = 0
 			leftbutton.staticy = 0
 			if object.down and object.hover then
-				bar:Scroll(-self.parent.buttonscrollamount)
+				local dtscrolling = self.parent.dtscrolling
+				if dtscrolling then
+					local dt = love.timer.getDelta()
+					bar:Scroll(-self.parent.buttonscrollamount * dt)
+				else
+					bar:Scroll(-self.parent.buttonscrollamount)
+				end
 			end
 		end
-			
-		local rightbutton       = scrollbutton:new("right")
-		rightbutton.parent      = self
+		local rightbutton = loveframes.objects["scrollbutton"]:new("right")
+		rightbutton.parent = self
 		rightbutton.Update = function(object, dt)
 			rightbutton.staticx = 0 + self.width - rightbutton.width
 			rightbutton.staticy = 0
 			if object.down and object.hover then
-				bar:Scroll(self.parent.buttonscrollamount)
+				local dtscrolling = self.parent.dtscrolling
+				if dtscrolling then
+					local dt = love.timer.getDelta()
+					bar:Scroll(self.parent.buttonscrollamount * dt)
+				else
+					bar:Scroll(self.parent.buttonscrollamount)
+				end
 			end
 		end
-		
 		table.insert(self.internals, leftbutton)
 		table.insert(self.internals, rightbutton)
-		
 	end
+	
+	local parentstate = parent.state
+	self:SetState(parentstate)
 	
 	-- apply template properties to the object
 	loveframes.templates.ApplyToObject(self)
@@ -97,9 +116,9 @@ end
 	- func: update(deltatime)
 	- desc: updates the object
 --]]---------------------------------------------------------
-function scrollbody:update(dt)
+function newobject:update(dt)
 	
-	local visible      = self.visible
+	local visible = self.visible
 	local alwaysupdate = self.alwaysupdate
 	
 	if not visible then
@@ -108,9 +127,9 @@ function scrollbody:update(dt)
 		end
 	end
 	
-	local parent    = self.parent
-	local base      = loveframes.base
-	local update    = self.Update
+	local parent = self.parent
+	local base = loveframes.base
+	local update = self.Update
 	local internals = self.internals
 	
 	-- move to parent if there is a parent
@@ -135,7 +154,7 @@ end
 	- func: draw()
 	- desc: draws the object
 --]]---------------------------------------------------------
-function scrollbody:draw()
+function newobject:draw()
 
 	local visible = self.visible
 	
@@ -143,15 +162,15 @@ function scrollbody:draw()
 		return
 	end
 	
-	local skins         = loveframes.skins.available
-	local skinindex     = loveframes.config["ACTIVESKIN"]
-	local defaultskin   = loveframes.config["DEFAULTSKIN"]
-	local selfskin      = self.skin
-	local skin          = skins[selfskin] or skins[skinindex]
-	local drawfunc      = skin.DrawScrollBody or skins[defaultskin].DrawScrollBody
-	local draw          = self.Draw
-	local drawcount     = loveframes.drawcount
-	local internals     = self.internals
+	local skins = loveframes.skins.available
+	local skinindex = loveframes.config["ACTIVESKIN"]
+	local defaultskin = loveframes.config["DEFAULTSKIN"]
+	local selfskin = self.skin
+	local skin = skins[selfskin] or skins[skinindex]
+	local drawfunc = skin.DrawScrollBody or skins[defaultskin].DrawScrollBody
+	local draw = self.Draw
+	local drawcount = loveframes.drawcount
+	local internals = self.internals
 	
 	-- set the object's draw order
 	self:SetDrawOrder()

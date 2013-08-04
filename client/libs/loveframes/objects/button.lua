@@ -1,26 +1,26 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- button class
-button = class("button", base)
+local newobject = loveframes.NewObject("button", "loveframes_object_button", true)
 
 --[[---------------------------------------------------------
 	- func: initialize()
 	- desc: initializes the object
 --]]---------------------------------------------------------
-function button:initialize()
+function newobject:initialize()
 	
-	self.type           = "button"
-	self.text           = "Button"
-	self.width          = 80
-	self.height         = 25
-	self.internal       = false
-	self.down           = false
-	self.clickable      = true
-	self.enabled        = true
-	self.OnClick        = nil
+	self.type = "button"
+	self.text = "Button"
+	self.width = 80
+	self.height = 25
+	self.internal = false
+	self.down = false
+	self.clickable = true
+	self.enabled = true
+	self.OnClick = nil
 	
 end
 
@@ -28,7 +28,14 @@ end
 	- func: update(deltatime)
 	- desc: updates the object
 --]]---------------------------------------------------------
-function button:update(dt)
+function newobject:update(dt)
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	local alwaysupdate = self.alwaysupdate
@@ -41,23 +48,22 @@ function button:update(dt)
 	
 	self:CheckHover()
 	
-	local hover       = self.hover
-	local down        = self.down
+	local hover = self.hover
+	local down = self.down
 	local hoverobject = loveframes.hoverobject
-	local parent      = self.parent
-	local base        = loveframes.base
-	local update      = self.Update
+	local parent = self.parent
+	local base = loveframes.base
+	local update = self.Update
 	
 	if not hover then
 		self.down = false
+		if hoverobject == self then
+			self.hover = true
+		end
 	else
 		if hoverobject == self then
 			self.down = true
 		end
-	end
-	
-	if not down and hoverobject == self then
-		self.hover = true
 	end
 	
 	-- move to parent if there is a parent
@@ -76,7 +82,14 @@ end
 	- func: draw()
 	- desc: draws the object
 --]]---------------------------------------------------------
-function button:draw()
+function newobject:draw()
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	
@@ -84,14 +97,14 @@ function button:draw()
 		return
 	end
 
-	local skins	        = loveframes.skins.available
-	local skinindex	    = loveframes.config["ACTIVESKIN"]
-	local defaultskin   = loveframes.config["DEFAULTSKIN"]
-	local selfskin      = self.skin
-	local skin          = skins[selfskin] or skins[skinindex]
-	local drawfunc      = skin.DrawButton or skins[defaultskin].DrawButton
-	local draw          = self.Draw
-	local drawcount     = loveframes.drawcount
+	local skins = loveframes.skins.available
+	local skinindex = loveframes.config["ACTIVESKIN"]
+	local defaultskin = loveframes.config["DEFAULTSKIN"]
+	local selfskin = self.skin
+	local skin = skins[selfskin] or skins[skinindex]
+	local drawfunc = skin.DrawButton or skins[defaultskin].DrawButton
+	local draw = self.Draw
+	local drawcount = loveframes.drawcount
 	
 	-- set the object's draw order
 	self:SetDrawOrder()
@@ -108,8 +121,15 @@ end
 	- func: mousepressed(x, y, button)
 	- desc: called when the player presses a mouse button
 --]]---------------------------------------------------------
-function button:mousepressed(x, y, button)
+function newobject:mousepressed(x, y, button)
 
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
 	local visible = self.visible
 	
 	if not visible then
@@ -119,16 +139,12 @@ function button:mousepressed(x, y, button)
 	local hover = self.hover
 	
 	if hover and button == "l" then
-		
 		local baseparent = self:GetBaseParent()
-	
 		if baseparent and baseparent.type == "frame" then
 			baseparent:MakeTop()
 		end
-	
 		self.down = true
 		loveframes.hoverobject = self
-		
 	end
 	
 end
@@ -137,7 +153,14 @@ end
 	- func: mousereleased(x, y, button)
 	- desc: called when the player releases a mouse button
 --]]---------------------------------------------------------
-function button:mousereleased(x, y, button)
+function newobject:mousereleased(x, y, button)
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	
@@ -145,11 +168,11 @@ function button:mousereleased(x, y, button)
 		return
 	end
 	
-	local hover     = self.hover
-	local down      = self.down
+	local hover = self.hover
+	local down = self.down
 	local clickable = self.clickable
-	local enabled   = self.enabled
-	local onclick   = self.OnClick
+	local enabled = self.enabled
+	local onclick = self.OnClick
 	
 	if hover and down and clickable and button == "l" then
 		if enabled then
@@ -164,31 +187,10 @@ function button:mousereleased(x, y, button)
 end
 
 --[[---------------------------------------------------------
-	- func: keypressed(key)
-	- desc: called when the player presses a key
---]]---------------------------------------------------------
-function button:keypressed(key, unicode)
-	
-	local visible = self.visible
-	
-	if not visible then
-		return
-	end
-	
-	local selectedobject = loveframes.selectedobject
-	local onclick        = self.OnClick
-	
-	if key == "return" and selectedobject == self then
-		onclick(self, 0, 0)
-	end
-
-end
-
---[[---------------------------------------------------------
 	- func: SetText(text)
 	- desc: sets the object's text
 --]]---------------------------------------------------------
-function button:SetText(text)
+function newobject:SetText(text)
 
 	self.text = text
 	
@@ -198,7 +200,7 @@ end
 	- func: GetText()
 	- desc: gets the object's text
 --]]---------------------------------------------------------
-function button:GetText()
+function newobject:GetText()
 
 	return self.text
 	
@@ -208,7 +210,7 @@ end
 	- func: SetClickable(bool)
 	- desc: sets whether the object can be clicked or not
 --]]---------------------------------------------------------
-function button:SetClickable(bool)
+function newobject:SetClickable(bool)
 
 	self.clickable = bool
 	
@@ -218,7 +220,7 @@ end
 	- func: GetClickable(bool)
 	- desc: gets whether the object can be clicked or not
 --]]---------------------------------------------------------
-function button:GetClickable()
+function newobject:GetClickable()
 
 	return self.clickable
 	
@@ -226,9 +228,9 @@ end
 
 --[[---------------------------------------------------------
 	- func: SetClickable(bool)
-	- desc: sets whether the object is enabled or not
+	- desc: sets whether or not the object is enabled
 --]]---------------------------------------------------------
-function button:SetEnabled(bool)
+function newobject:SetEnabled(bool)
 
 	self.enabled = bool
 	
@@ -236,9 +238,9 @@ end
 
 --[[---------------------------------------------------------
 	- func: GetEnabled()
-	- desc: gets whether the object is enabled or not
+	- desc: gets whether or not the object is enabled
 --]]---------------------------------------------------------
-function button:GetEnabled()
+function newobject:GetEnabled()
 
 	return self.enabled
 	

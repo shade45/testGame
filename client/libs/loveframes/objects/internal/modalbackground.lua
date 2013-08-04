@@ -1,25 +1,25 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- modalbackground class
-modalbackground = class("modalbackground", base)
+local newobject = loveframes.NewObject("modalbackground", "loveframes_object_modalbackground", true)
 
 --[[---------------------------------------------------------
 	- func: initialize()
 	- desc: initializes the object
 --]]---------------------------------------------------------
-function modalbackground:initialize(object)
+function newobject:initialize(object)
 	
-	self.type           = "modalbackground"
-	self.width          = love.graphics.getWidth()
-	self.height         = love.graphics.getHeight()
-	self.x              = 0
-	self.y              = 0
-	self.internal       = true
-	self.parent         = loveframes.base
-	self.object         = object
+	self.type = "modalbackground"
+	self.width = love.graphics.getWidth()
+	self.height = love.graphics.getHeight()
+	self.x = 0
+	self.y = 0
+	self.internal = true
+	self.parent = loveframes.base
+	self.object = object
 	
 	table.insert(loveframes.base.children, self)
 	
@@ -36,9 +36,9 @@ end
 	- func: update(deltatime)
 	- desc: updates the element
 --]]---------------------------------------------------------
-function modalbackground:update(dt)
+function newobject:update(dt)
 	
-	local visible      = self.visible
+	local visible = self.visible
 	local alwaysupdate = self.alwaysupdate
 	
 	if not visible then
@@ -47,9 +47,9 @@ function modalbackground:update(dt)
 		end
 	end
 	
-	local object       = self.object
-	local update       = self.Update
-	local base         = loveframes.base
+	local object = self.object
+	local update = self.Update
+	local base = loveframes.base
 	local basechildren = base.children
 	
 	if #basechildren > 1 then
@@ -74,20 +74,20 @@ end
 	- func: draw()
 	- desc: draws the object
 --]]---------------------------------------------------------
-function modalbackground:draw()
+function newobject:draw()
 	
 	if not self.visible then
 		return
 	end
 	
-	local skins         = loveframes.skins.available
-	local skinindex     = loveframes.config["ACTIVESKIN"]
-	local defaultskin   = loveframes.config["DEFAULTSKIN"]
-	local selfskin      = self.skin
-	local skin          = skins[selfskin] or skins[skinindex]
-	local drawfunc      = skin.DrawModalBackground or skins[defaultskin].DrawModalBackground
-	local draw          = self.Draw
-	local drawcount     = loveframes.drawcount
+	local skins = loveframes.skins.available
+	local skinindex = loveframes.config["ACTIVESKIN"]
+	local defaultskin = loveframes.config["DEFAULTSKIN"]
+	local selfskin = self.skin
+	local skin = skins[selfskin] or skins[skinindex]
+	local drawfunc = skin.DrawModalBackground or skins[defaultskin].DrawModalBackground
+	local draw = self.Draw
+	local drawcount = loveframes.drawcount
 	
 	-- set the object's draw order
 	self:SetDrawOrder()

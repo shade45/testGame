@@ -1,6 +1,6 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- skins library
@@ -15,13 +15,13 @@ loveframes.skins.available = {}
 --]]---------------------------------------------------------
 function loveframes.skins.Register(skin)
 	
-	local name        = skin.name
-	local author      = skin.author
-	local version     = skin.version
-	local namecheck   = loveframes.skins.available[name]
-	local dir         = loveframes.config["DIRECTORY"] .. "/skins/" ..name
-	local dircheck    = love.filesystem.isDirectory(dir)
-	local images      = loveframes.util.GetDirectoryContents(dir .. "/images")
+	local name = skin.name
+	local author = skin.author
+	local version = skin.version
+	local namecheck = loveframes.skins.available[name]
+	local dir = loveframes.config["DIRECTORY"] .. "/skins/" ..name
+	local dircheck = love.filesystem.isDirectory(dir)
+	local images = loveframes.util.GetDirectoryContents(dir .. "/images")
 	local indeximages = loveframes.config["INDEXSKINIMAGES"]
 	
 	if name == "" or not name then
@@ -32,7 +32,7 @@ function loveframes.skins.Register(skin)
 		loveframes.util.Error("Could not register skin: Invalid or missing author data.")
 	end
 	
-	if version == "" or version == nil then
+	if version == "" or not version then
 		loveframes.util.Error("Could not register skin: Invalid or missing version data.")
 	end
 	
@@ -48,12 +48,21 @@ function loveframes.skins.Register(skin)
 	loveframes.skins.available[name].dir = dir
 	loveframes.skins.available[name].images = {}
 	
-	if #images > 0 and indeximages == true then
-	
+	if #images > 0 and indeximages then
 		for k, v in ipairs(images) do
 			loveframes.skins.available[name].images[v.name .. "." .. v.extension] = love.graphics.newImage(v.fullpath)
 		end
-		
 	end
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetAvailable()
+	- desc: gets all available skins
+--]]---------------------------------------------------------
+function loveframes.skins.GetAvailable()
+
+	local available = loveframes.skins.available
+	return available
 	
 end

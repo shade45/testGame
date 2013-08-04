@@ -1,34 +1,36 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- tabs class
-tabs = class("tabpanel", base)
+local newobject = loveframes.NewObject("tabs", "loveframes_object_tabs", true)
 
 --[[---------------------------------------------------------
 	- func: initialize()
 	- desc: initializes the object
 --]]---------------------------------------------------------
-function tabs:initialize()
+function newobject:initialize()
 	
-	self.type              = "tabs"
-	self.width             = 100
-	self.height            = 50
-	self.clickx            = 0
-	self.clicky            = 0
-	self.offsetx           = 0
-	self.tab               = 1
-	self.tabnumber         = 1
-	self.padding           = 5
-	self.tabheight         = 25
+	self.type = "tabs"
+	self.width = 100
+	self.height = 50
+	self.clickx = 0
+	self.clicky = 0
+	self.offsetx = 0
+	self.tab = 1
+	self.tabnumber = 1
+	self.padding = 5
+	self.tabheight = 25
 	self.previoustabheight = 25
-	self.autosize          = true
-	self.internal          = false
-	self.tooltipfont       = loveframes.basicfontsmall
-	self.tabs              = {}
-	self.internals         = {}
-	self.children          = {}
+	self.buttonscrollamount = 200
+	self.mousewheelscrollamount = 1500
+	self.autosize = true
+	self.dtscrolling = true
+	self.internal = false
+	self.tooltipfont = loveframes.basicfontsmall
+	self.internals = {}
+	self.children = {}
 	
 end
 
@@ -36,9 +38,16 @@ end
 	- func: update(deltatime)
 	- desc: updates the element
 --]]---------------------------------------------------------
-function tabs:update(dt)
+function newobject:update(dt)
 	
-	local visible      = self.visible
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
+	local visible = self.visible
 	local alwaysupdate = self.alwaysupdate
 	
 	if not visible then
@@ -47,20 +56,18 @@ function tabs:update(dt)
 		end
 	end
 	
-	local x, y              = love.mouse.getPosition()
-	local tabheight         = self.tabheight
-	local padding           = self.padding
-	local autosize          = self.autosize
-	local padding           = self.padding
-	local autosize          = self.autosize
-	local children          = self.children
-	local numchildren       = #children
-	local internals         = self.internals
-	local tab               = self.tab
-	local parent            = self.parent
-	local autosize          = self.autosize
-	local base              = loveframes.base
-	local update            = self.Update
+	local x, y = love.mouse.getPosition()
+	local tabheight = self.tabheight
+	local padding = self.padding
+	local autosize = self.autosize
+	local padding = self.padding
+	local children = self.children
+	local numchildren = #children
+	local internals = self.internals
+	local tab = self.tab
+	local parent = self.parent
+	local base = loveframes.base
+	local update = self.Update
 	
 	-- move to parent if there is a parent
 	if parent ~= base then
@@ -79,8 +86,8 @@ function tabs:update(dt)
 	for k, v in ipairs(internals) do
 		v:update(dt)
 		if v.type == "tabbutton" then
-			v.y = (v.parent.y + v.staticy)
 			v.x = (v.parent.x + v.staticx) + pos + self.offsetx
+			v.y = (v.parent.y + v.staticy)
 			pos = pos + v.width - 1
 		end
 	end
@@ -100,7 +107,14 @@ end
 	- func: draw()
 	- desc: draws the object
 --]]---------------------------------------------------------
-function tabs:draw()
+function newobject:draw()
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	
@@ -108,19 +122,19 @@ function tabs:draw()
 		return
 	end
 	
-	local internals     = self.internals
-	local tabheight     = self:GetHeightOfButtons()
-	local stencilfunc   = function() love.graphics.rectangle("fill", self.x, self.y, self.width, tabheight) end
-	local stencil       = love.graphics.newStencil(stencilfunc)
-	local internals     = self.internals
-	local skins         = loveframes.skins.available
-	local skinindex     = loveframes.config["ACTIVESKIN"]
-	local defaultskin   = loveframes.config["DEFAULTSKIN"]
-	local selfskin      = self.skin
-	local skin          = skins[selfskin] or skins[skinindex]
-	local drawfunc      = skin.DrawTabPanel or skins[defaultskin].DrawTabPanel
-	local draw          = self.Draw
-	local drawcount     = loveframes.drawcount
+	local internals = self.internals
+	local tabheight = self:GetHeightOfButtons()
+	local stencilfunc = function() love.graphics.rectangle("fill", self.x, self.y, self.width, tabheight) end
+	local stencil = love.graphics.newStencil(stencilfunc)
+	local internals = self.internals
+	local skins = loveframes.skins.available
+	local skinindex = loveframes.config["ACTIVESKIN"]
+	local defaultskin = loveframes.config["DEFAULTSKIN"]
+	local selfskin = self.skin
+	local skin = skins[selfskin] or skins[skinindex]
+	local drawfunc = skin.DrawTabPanel or skins[defaultskin].DrawTabPanel
+	local draw = self.Draw
+	local drawcount = loveframes.drawcount
 	
 	-- set the object's draw order
 	self:SetDrawOrder()
@@ -149,7 +163,14 @@ end
 	- func: mousepressed(x, y, button)
 	- desc: called when the player presses a mouse button
 --]]---------------------------------------------------------
-function tabs:mousepressed(x, y, button)
+function newobject:mousepressed(x, y, button)
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	
@@ -157,57 +178,60 @@ function tabs:mousepressed(x, y, button)
 		return
 	end
 	
-	local children     = self.children
-	local numchildren  = #children
-	local tab          = self.tab
-	local internals    = self.internals
+	local children = self.children
+	local numchildren = #children
+	local tab = self.tab
+	local internals = self.internals
 	local numinternals = #internals
-	local hover        = self.hover
+	local hover = self.hover
 	
 	if hover then
-	
 		if button == "l" then
-		
 			local baseparent = self:GetBaseParent()
-		
 			if baseparent and baseparent.type == "frame" then
 				baseparent:MakeTop()
 			end
-			
 		end
-		
 	end
 	
 	if button == "wu" then
-		
 		local buttonheight = self:GetHeightOfButtons()
-		local col          = loveframes.util.BoundingBox(self.x, x, self.y, y, self.width, 1, buttonheight, 1)
-		local visible      = internals[numinternals - 1]:GetVisible()
-			
+		local col = loveframes.util.BoundingBox(self.x, x, self.y, y, self.width, 1, buttonheight, 1)
+		local visible = internals[numinternals - 1]:GetVisible()
 		if col and visible then
-			self.offsetx = self.offsetx + 5
+			local scrollamount = self.mousewheelscrollamount
+			local dtscrolling = self.dtscrolling
+			if dtscrolling then
+				local dt = love.timer.getDelta()
+				self.offsetx = self.offsetx + scrollamount * dt
+			else
+				self.offsetx = self.offsetx + scrollamount
+			end
 			if self.offsetx > 0 then
 				self.offsetx = 0
 			end
 		end
-			
 	end
 		
 	if button == "wd" then
-		
 		local buttonheight = self:GetHeightOfButtons()
-		local col          = loveframes.util.BoundingBox(self.x, x, self.y, y, self.width, 1, buttonheight, 1)
-		local visible      = internals[numinternals]:GetVisible()
-			
+		local col = loveframes.util.BoundingBox(self.x, x, self.y, y, self.width, 1, buttonheight, 1)
+		local visible = internals[numinternals]:GetVisible()
 		if col and visible then
 			local bwidth = self:GetWidthOfButtons()
 			if (self.offsetx + bwidth) < self.width then
 				self.offsetx = bwidth - self.width
 			else
-				self.offsetx = self.offsetx - 5
+				local scrollamount = self.mousewheelscrollamount
+				local dtscrolling = self.dtscrolling
+				if dtscrolling then
+					local dt = love.timer.getDelta()
+					self.offsetx = self.offsetx - scrollamount * dt
+				else
+					self.offsetx = self.offsetx - scrollamount
+				end
 			end
 		end
-			
 	end
 	
 	for k, v in ipairs(internals) do
@@ -224,13 +248,20 @@ end
 	- func: mousereleased(x, y, button)
 	- desc: called when the player releases a mouse button
 --]]---------------------------------------------------------
-function tabs:mousereleased(x, y, button)
+function newobject:mousereleased(x, y, button)
 
-	local visible     = self.visible
-	local children    = self.children
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
+	local visible = self.visible
+	local children = self.children
 	local numchildren = #children
-	local tab         = self.tab
-	local internals   = self.internals
+	local tab = self.tab
+	local internals = self.internals
 	
 	if not visible then
 		return
@@ -250,34 +281,30 @@ end
 	- func: AddTab(name, object, tip, image)
 	- desc: adds a new tab to the tab panel
 --]]---------------------------------------------------------
-function tabs:AddTab(name, object, tip, image)
+function newobject:AddTab(name, object, tip, image, onopened, onclosed)
 
-	local padding   = self.padding
-	local autosize  = self.autosize
+	local padding = self.padding
+	local autosize = self.autosize
 	local tabnumber = self.tabnumber
 	local tabheight = self.tabheight
 	local internals = self.internals
+	local state = self.state
 	
 	object:Remove()
 	object.parent = self
+	object:SetState(state)
 	object.staticx = 0
 	object.staticy = 0
 	
 	table.insert(self.children, object)
-	internals[tabnumber] = tabbutton:new(self, name, tabnumber, tip, image)
+	internals[tabnumber] = loveframes.objects["tabbutton"]:new(self, name, tabnumber, tip, image, onopened, onclosed)
 	self.tabnumber = tabnumber + 1
-	
-	for k, v in ipairs(internals) do
-		self:SwitchToTab(k)
-		break
-	end
-	
 	self:AddScrollButtons()
 	
 	if autosize and not retainsize then
-		object:SetSize(self.width - padding*2, (self.height - tabheight) - padding*2)
+		object:SetSize(self.width - padding * 2, (self.height - tabheight) - padding * 2)
 	end
-		
+	
 end
 
 --[[---------------------------------------------------------
@@ -285,9 +312,10 @@ end
 	- desc: creates scroll buttons fot the tab panel
 	- note: for internal use only
 --]]---------------------------------------------------------
-function tabs:AddScrollButtons()
+function newobject:AddScrollButtons()
 
 	local internals = self.internals
+	local state = self.state
 	
 	for k, v in ipairs(internals) do
 		if v.type == "scrollbutton" then
@@ -295,7 +323,7 @@ function tabs:AddScrollButtons()
 		end
 	end
 	
-	local leftbutton = scrollbutton:new("left")
+	local leftbutton = loveframes.objects["scrollbutton"]:new("left")
 	leftbutton.parent = self
 	leftbutton:SetPos(0, 0)
 	leftbutton:SetSize(15, 25)
@@ -308,15 +336,23 @@ function tabs:AddScrollButtons()
 			object.down = false
 			object.hover = false
 		end
-		
-		if object.down == true then
-			if self.offsetx ~= 0 then
-				self.offsetx = self.offsetx + 1
+		if object.down then
+			if self.offsetx > 0 then
+				self.offsetx = 0
+			else
+				local scrollamount = self.buttonscrollamount
+				local dtscrolling = self.dtscrolling
+				if dtscrolling then
+					local dt = love.timer.getDelta()
+					self.offsetx = self.offsetx + scrollamount * dt
+				else
+					self.offsetx = self.offsetx + scrollamount
+				end
 			end
 		end
 	end
 	
-	local rightbutton = scrollbutton:new("right")
+	local rightbutton = loveframes.objects["scrollbutton"]:new("right")
 	rightbutton.parent = self
 	rightbutton:SetPos(self.width - 15, 0)
 	rightbutton:SetSize(15, 25)
@@ -330,13 +366,22 @@ function tabs:AddScrollButtons()
 			object.down = false
 			object.hover = false
 		end
-		
-		if object.down == true then
+		if object.down then
 			if ((self.x + self.offsetx) + bwidth) ~= (self.x + self.width) then
-				self.offsetx = self.offsetx - 1
+				local scrollamount = self.buttonscrollamount
+				local dtscrolling = self.dtscrolling
+				if dtscrolling then
+					local dt = love.timer.getDelta()
+					self.offsetx = self.offsetx - scrollamount * dt
+				else
+					self.offsetx = self.offsetx - scrollamount
+				end
 			end
 		end
 	end
+	
+	leftbutton.state = state
+	rightbutton.state = state
 	
 	table.insert(internals, leftbutton)
 	table.insert(internals, rightbutton)
@@ -347,9 +392,9 @@ end
 	- func: GetWidthOfButtons()
 	- desc: gets the total width of all of the tab buttons
 --]]---------------------------------------------------------
-function tabs:GetWidthOfButtons()
+function newobject:GetWidthOfButtons()
 
-	local width     = 0
+	local width = 0
 	local internals = self.internals
 	
 	for k, v in ipairs(internals) do
@@ -366,7 +411,7 @@ end
 	- func: GetHeightOfButtons()
 	- desc: gets the height of one tab button
 --]]---------------------------------------------------------
-function tabs:GetHeightOfButtons()
+function newobject:GetHeightOfButtons()
 	
 	return self.tabheight
 	
@@ -376,7 +421,7 @@ end
 	- func: SwitchToTab(tabnumber)
 	- desc: makes the specified tab the active tab
 --]]---------------------------------------------------------
-function tabs:SwitchToTab(tabnumber)
+function newobject:SwitchToTab(tabnumber)
 	
 	local children = self.children
 	
@@ -393,7 +438,7 @@ end
 	- func: SetScrollButtonSize(width, height)
 	- desc: sets the size of the scroll buttons
 --]]---------------------------------------------------------
-function tabs:SetScrollButtonSize(width, height)
+function newobject:SetScrollButtonSize(width, height)
 
 	local internals = self.internals
 	
@@ -409,7 +454,7 @@ end
 	- func: SetPadding(paddint)
 	- desc: sets the padding for the tab panel
 --]]---------------------------------------------------------
-function tabs:SetPadding(padding)
+function newobject:SetPadding(padding)
 
 	self.padding = padding
 	
@@ -419,7 +464,7 @@ end
 	- func: SetPadding(paddint)
 	- desc: gets the padding of the tab panel
 --]]---------------------------------------------------------
-function tabs:GetPadding()
+function newobject:GetPadding()
 
 	return self.padding
 	
@@ -429,13 +474,13 @@ end
 	- func: SetTabHeight(height)
 	- desc: sets the height of the tab buttons
 --]]---------------------------------------------------------
-function tabs:SetTabHeight(height)
+function newobject:SetTabHeight(height)
 
-	local autosize          = self.autosize
-	local padding           = self.padding
+	local autosize = self.autosize
+	local padding = self.padding
 	local previoustabheight = self.previoustabheight
-	local children          = self.children
-	local internals         = self.internals
+	local children = self.children
+	local internals = self.internals
 	
 	self.tabheight = height
 	
@@ -463,7 +508,7 @@ end
 	- func: SetToolTipFont(font)
 	- desc: sets the height of the tab buttons
 --]]---------------------------------------------------------
-function tabs:SetToolTipFont(font)
+function newobject:SetToolTipFont(font)
 
 	local internals = self.internals
 	
@@ -479,8 +524,108 @@ end
 	- func: GetTabNumber()
 	- desc: gets the object's tab number
 --]]---------------------------------------------------------
-function tabs:GetTabNumber()
+function newobject:GetTabNumber()
 
 	return self.tab
+	
+end
+
+--[[---------------------------------------------------------
+	- func: RemoveTab(id)
+	- desc: removes a tab from the object
+--]]---------------------------------------------------------
+function newobject:RemoveTab(id)
+
+	local children = self.children
+	local internals = self.internals
+	local tab = children[id]
+	
+	if tab then
+		tab:Remove()
+	end
+	
+	for k, v in ipairs(internals) do
+		if v.type == "tabbutton" then
+			if v.tabnumber == id then
+				v:Remove()
+			end
+		end
+	end
+	
+	local tabnumber = 1
+	
+	for k, v in ipairs(internals) do
+		if v.type == "tabbutton" then
+			v.tabnumber = tabnumber
+			tabnumber = tabnumber + 1
+		end
+	end
+	
+	self.tabnumber = tabnumber
+	self:AddScrollButtons()
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetButtonScrollAmount(speed)
+	- desc: sets the scroll amount of the object's scrollbar
+			buttons
+--]]---------------------------------------------------------
+function newobject:SetButtonScrollAmount(amount)
+
+	self.buttonscrollamount = amount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetButtonScrollAmount()
+	- desc: gets the scroll amount of the object's scrollbar
+			buttons
+--]]---------------------------------------------------------
+function newobject:GetButtonScrollAmount()
+
+	return self.buttonscrollamount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetMouseWheelScrollAmount(amount)
+	- desc: sets the scroll amount of the mouse wheel
+--]]---------------------------------------------------------
+function newobject:SetMouseWheelScrollAmount(amount)
+
+	self.mousewheelscrollamount = amount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetMouseWheelScrollAmount()
+	- desc: gets the scroll amount of the mouse wheel
+--]]---------------------------------------------------------
+function newobject:GetButtonScrollAmount()
+
+	return self.mousewheelscrollamount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetDTScrolling(bool)
+	- desc: sets whether or not the object should use delta
+			time when scrolling
+--]]---------------------------------------------------------
+function newobject:SetDTScrolling(bool)
+
+	self.dtscrolling = bool
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetDTScrolling()
+	- desc: gets whether or not the object should use delta
+			time when scrolling
+--]]---------------------------------------------------------
+function newobject:GetDTScrolling()
+
+	return self.dtscrolling
 	
 end

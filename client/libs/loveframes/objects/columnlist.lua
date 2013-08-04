@@ -1,28 +1,36 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- columnlist class
-columnlist = class("columnlist", base)
+local newobject = loveframes.NewObject("columnlist", "loveframes_object_columnlist", true)
 
 --[[---------------------------------------------------------
 	- func: initialize()
 	- desc: intializes the element
 --]]---------------------------------------------------------
-function columnlist:initialize()
+function newobject:initialize()
 	
-	self.type           = "columnlist"
-	self.width          = 300
-	self.height         = 100
-	self.autoscroll     = false
-	self.internal       = false
-	self.children       = {}
-	self.internals      = {}
-	self.OnRowClicked   = nil
-	self.OnScroll       = nil
+	self.type = "columnlist"
+	self.width = 300
+	self.height = 100
+	self.columnheight = 16
+	self.buttonscrollamount = 200
+	self.mousewheelscrollamount = 1500
+	self.autoscroll = false
+	self.dtscrolling = true
+	self.internal = false
+	self.selectionenabled = true
+	self.multiselect = false
+	self.children = {}
+	self.internals = {}
+	self.OnRowClicked = nil
+	self.OnRowRightClicked = nil
+	self.OnRowSelected = nil
+	self.OnScroll = nil
 
-	local list = columnlistarea:new(self)
+	local list = loveframes.objects["columnlistarea"]:new(self)
 	table.insert(self.internals, list)
 	
 end
@@ -31,7 +39,14 @@ end
 	- func: update(deltatime)
 	- desc: updates the object
 --]]---------------------------------------------------------
-function columnlist:update(dt)
+function newobject:update(dt)
+	
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
 	
 	local visible = self.visible
 	local alwaysupdate = self.alwaysupdate
@@ -42,11 +57,11 @@ function columnlist:update(dt)
 		end
 	end
 	
-	local parent    = self.parent
-	local base      = loveframes.base
-	local children  = self.children
+	local parent = self.parent
+	local base = loveframes.base
+	local children = self.children
 	local internals = self.internals
-	local update    = self.Update
+	local update = self.Update
 	
 	self:CheckHover()
 	
@@ -74,24 +89,31 @@ end
 	- func: draw()
 	- desc: draws the object
 --]]---------------------------------------------------------
-function columnlist:draw()
+function newobject:draw()
 
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
 	local visible = self.visible
 	
 	if not visible then
 		return
 	end
 	
-	local children      = self.children
-	local internals     = self.internals
-	local skins         = loveframes.skins.available
-	local skinindex     = loveframes.config["ACTIVESKIN"]
-	local defaultskin   = loveframes.config["DEFAULTSKIN"]
-	local selfskin      = self.skin
-	local skin          = skins[selfskin] or skins[skinindex]
-	local drawfunc      = skin.DrawColumnList or skins[defaultskin].DrawColumnList
-	local draw          = self.Draw
-	local drawcount     = loveframes.drawcount
+	local children = self.children
+	local internals = self.internals
+	local skins = loveframes.skins.available
+	local skinindex = loveframes.config["ACTIVESKIN"]
+	local defaultskin = loveframes.config["DEFAULTSKIN"]
+	local selfskin = self.skin
+	local skin = skins[selfskin] or skins[skinindex]
+	local drawfunc = skin.DrawColumnList or skins[defaultskin].DrawColumnList
+	local draw = self.Draw
+	local drawcount = loveframes.drawcount
 	
 	-- set the object's draw order
 	self:SetDrawOrder()
@@ -116,28 +138,32 @@ end
 	- func: mousepressed(x, y, button)
 	- desc: called when the player presses a mouse button
 --]]---------------------------------------------------------
-function columnlist:mousepressed(x, y, button)
+function newobject:mousepressed(x, y, button)
 
-	local visible = self.visible
+	local state = loveframes.state
+	local selfstate = self.state
 	
-	if visible == false then
+	if state ~= selfstate then
 		return
 	end
 	
-	local hover     = self.hover
+	local visible = self.visible
+	
+	if not visible then
+		return
+	end
+	
+	local hover = self.hover
 	local children  = self.children
 	local internals = self.internals
 	
-	if hover == true and button == "l" then
-	
+	if hover and button == "l" then
 		local baseparent = self:GetBaseParent()
-	
 		if baseparent and baseparent.type == "frame" then
 			baseparent:MakeTop()
 		end
-		
 	end
-		
+	
 	for k, v in ipairs(internals) do
 		v:mousepressed(x, y, button)
 	end
@@ -152,11 +178,18 @@ end
 	- func: mousereleased(x, y, button)
 	- desc: called when the player releases a mouse button
 --]]---------------------------------------------------------
-function columnlist:mousereleased(x, y, button)
+function newobject:mousereleased(x, y, button)
 
+	local state = loveframes.state
+	local selfstate = self.state
+	
+	if state ~= selfstate then
+		return
+	end
+	
 	local visible = self.visible
 	
-	if visible == false then
+	if not visible then
 		return
 	end
 	
@@ -177,22 +210,22 @@ end
 	- func: Adjustchildren()
 	- desc: adjusts the width of the object's children
 --]]---------------------------------------------------------
-function columnlist:AdjustColumns()
+function newobject:AdjustColumns()
 
 	local width = self.width
-	local bar   = self.internals[1].bar
+	local bar = self.internals[1].bar
 	
 	if bar then
 		width = width - self.internals[1].internals[1].width
 	end
 	
-	local children    = self.children
+	local children = self.children
 	local numchildren = #children
 	local columnwidth = width/numchildren
-	local x           = 0
+	local x = 0
 	
 	for k, v in ipairs(children) do
-		if bar == true then
+		if bar then
 			v:SetWidth(columnwidth)
 		else
 			v:SetWidth(columnwidth)
@@ -208,16 +241,17 @@ end
 	- desc: gives the object a new column with the specified
 			name
 --]]---------------------------------------------------------
-function columnlist:AddColumn(name)
+function newobject:AddColumn(name)
 
 	local internals = self.internals
-	local list      = internals[1]
-	local height    = self.height
+	local list = internals[1]
+	local width = self.width
+	local height = self.height
 	
-	columnlistheader:new(name, self)
+	loveframes.objects["columnlistheader"]:new(name, self)
 	self:AdjustColumns()
 	
-	list:SetSize(self.width, height)
+	list:SetSize(width, height)
 	list:SetPos(0, 0)
 	
 end
@@ -226,10 +260,10 @@ end
 	- func: AddRow(...)
 	- desc: adds a row of data to the object's list
 --]]---------------------------------------------------------
-function columnlist:AddRow(...)
+function newobject:AddRow(...)
 
 	local internals = self.internals
-	local list      = internals[1]
+	local list = internals[1]
 	
 	list:AddRow(arg)
 	
@@ -239,9 +273,9 @@ end
 	- func: Getchildrenize()
 	- desc: gets the size of the object's children
 --]]---------------------------------------------------------
-function columnlist:GetColumnSize()
+function newobject:GetColumnSize()
 
-	local children    = self.children
+	local children = self.children
 	local numchildren = #self.children
 	
 	if numchildren > 0 then
@@ -259,16 +293,19 @@ end
 	- func: SetSize(width, height)
 	- desc: sets the object's size
 --]]---------------------------------------------------------
-function columnlist:SetSize(width, height)
+function newobject:SetSize(width, height)
 	
 	local internals = self.internals
-	local list      = internals[1]
+	local list = internals[1]
 	
 	self.width = width
 	self.height = height
+	self:AdjustColumns()
 	
 	list:SetSize(width, height)
 	list:SetPos(0, 0)
+	list:CalculateSize()
+	list:RedoLayout()
 	
 end
 
@@ -276,15 +313,18 @@ end
 	- func: SetWidth(width)
 	- desc: sets the object's width
 --]]---------------------------------------------------------
-function columnlist:SetWidth(width)
+function newobject:SetWidth(width)
 	
 	local internals = self.internals
-	local list      = internals[1]
+	local list = internals[1]
 	
 	self.width = width
+	self:AdjustColumns()
 	
 	list:SetSize(width)
 	list:SetPos(0, 0)
+	list:CalculateSize()
+	list:RedoLayout()
 	
 end
 
@@ -292,15 +332,18 @@ end
 	- func: SetHeight(height)
 	- desc: sets the object's height
 --]]---------------------------------------------------------
-function columnlist:SetHeight(height)
+function newobject:SetHeight(height)
 	
 	local internals = self.internals
-	local list      = internals[1]
+	local list = internals[1]
 	
 	self.height = height
+	self:AdjustColumns()
 	
 	list:SetSize(height)
 	list:SetPos(0, 0)
+	list:CalculateSize()
+	list:RedoLayout()
 	
 end
 
@@ -309,10 +352,10 @@ end
 	- desc: sets the object's max color index for
 			alternating row colors
 --]]---------------------------------------------------------
-function columnlist:SetMaxColorIndex(num)
+function newobject:SetMaxColorIndex(num)
 
 	local internals = self.internals
-	local list      = internals[1]
+	local list = internals[1]
 	
 	list.colorindexmax = num
 	
@@ -322,10 +365,10 @@ end
 	- func: Clear()
 	- desc: removes all items from the object's list
 --]]---------------------------------------------------------
-function columnlist:Clear()
+function newobject:Clear()
 
 	local internals = self.internals
-	local list      = internals[1]
+	local list = internals[1]
 	
 	list:Clear()
 	
@@ -337,10 +380,10 @@ end
 			auto scroll to the bottom when a new object is
 			added to the list
 --]]---------------------------------------------------------
-function columnlist:SetAutoScroll(bool)
+function newobject:SetAutoScroll(bool)
 
 	local internals = self.internals
-	local list      = internals[1]
+	local list = internals[1]
 	local scrollbar = list:GetScrollBar()
 	
 	self.autoscroll = bool
@@ -350,5 +393,203 @@ function columnlist:SetAutoScroll(bool)
 			scrollbar.autoscroll = bool
 		end
 	end
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetButtonScrollAmount(speed)
+	- desc: sets the scroll amount of the object's scrollbar
+			buttons
+--]]---------------------------------------------------------
+function newobject:SetButtonScrollAmount(amount)
+
+	self.buttonscrollamount = amount
+	self.internals[1].buttonscrollamount = amount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetButtonScrollAmount()
+	- desc: gets the scroll amount of the object's scrollbar
+			buttons
+--]]---------------------------------------------------------
+function newobject:GetButtonScrollAmount()
+
+	return self.buttonscrollamount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetMouseWheelScrollAmount(amount)
+	- desc: sets the scroll amount of the mouse wheel
+--]]---------------------------------------------------------
+function newobject:SetMouseWheelScrollAmount(amount)
+
+	self.mousewheelscrollamount = amount
+	self.internals[1].mousewheelscrollamount = amount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetMouseWheelScrollAmount()
+	- desc: gets the scroll amount of the mouse wheel
+--]]---------------------------------------------------------
+function newobject:GetButtonScrollAmount()
+
+	return self.mousewheelscrollamount
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetColumnHeight(height)
+	- desc: sets the height of the object's columns
+--]]---------------------------------------------------------
+function newobject:SetColumnHeight(height)
+
+	local children = self.children
+	local internals = self.internals
+	local list = internals[1]
+	
+	self.columnheight = height
+	
+	for k, v in ipairs(children) do
+		v:SetHeight(height)
+	end
+	
+	list:CalculateSize()
+	list:RedoLayout()
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetDTScrolling(bool)
+	- desc: sets whether or not the object should use delta
+			time when scrolling
+--]]---------------------------------------------------------
+function newobject:SetDTScrolling(bool)
+
+	self.dtscrolling = bool
+	self.internals[1].dtscrolling = bool
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetDTScrolling()
+	- desc: gets whether or not the object should use delta
+			time when scrolling
+--]]---------------------------------------------------------
+function newobject:GetDTScrolling()
+
+	return self.dtscrolling
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SelectRow(row, ctrl)
+	- desc: selects the specfied row in the object's list
+			of rows
+--]]---------------------------------------------------------
+function newobject:SelectRow(row, ctrl)
+
+	local selectionenabled = self.selectionenabled
+	
+	if not selectionenabled then
+		return
+	end
+	
+	local list = self.internals[1]
+	local children = list.children
+	local multiselect = self.multiselect
+	local onrowselected = self.OnRowSelected
+	
+	for k, v in ipairs(children) do
+		if v == row then
+			if v.selected and ctrl then
+				v.selected = false
+			else
+				v.selected = true
+				if onrowselected then
+					onrowselected(self, row, row:GetColumnData())
+				end
+			end
+		elseif v ~= row and not multiselect and not ctrl then
+			v.selected = false
+		end
+	end
+	
+end
+
+--[[---------------------------------------------------------
+	- func: DeselectRow(row)
+	- desc: deselects the specfied row in the object's list
+			of rows
+--]]---------------------------------------------------------
+function newobject:DeselectRow(row)
+
+	row.selected = false
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetSelectedRows()
+	- desc: gets the object's selected rows
+--]]---------------------------------------------------------
+function newobject:GetSelectedRows()
+	
+	local rows = {}
+	local list = self.internals[1]
+	local children = list.children
+	
+	for k, v in ipairs(children) do
+		if v.selected then
+			table.insert(rows, v)
+		end
+	end
+	
+	return v
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetSelectionEnabled(bool)
+	- desc: sets whether or not the object's rows can be
+			selected
+--]]---------------------------------------------------------
+function newobject:SetSelectionEnabled(bool)
+
+	self.selectionenabled = bool
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetSelectionEnabled()
+	- desc: gets whether or not the object's rows can be
+			selected
+--]]---------------------------------------------------------
+function newobject:GetSelectionEnabled()
+
+	return self.selectionenabled
+	
+end
+
+--[[---------------------------------------------------------
+	- func: SetMultiselectEnabled(bool)
+	- desc: sets whether or not the object can have more
+			than one row selected
+--]]---------------------------------------------------------
+function newobject:SetMultiselectEnabled(bool)
+
+	self.multiselect = bool
+	
+end
+
+--[[---------------------------------------------------------
+	- func: GetMultiselectEnabled()
+	- desc: gets whether or not the object can have more
+			than one row selected
+--]]---------------------------------------------------------
+function newobject:GetMultiselectEnabled()
+
+	return self.multiselect
 	
 end

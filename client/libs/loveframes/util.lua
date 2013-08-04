@@ -1,6 +1,6 @@
 --[[------------------------------------------------
 	-- Love Frames - A GUI library for LOVE --
-	-- Copyright (c) 2012 Kenny Shields --
+	-- Copyright (c) 2013 Kenny Shields --
 --]]------------------------------------------------
 
 -- util library
@@ -51,17 +51,29 @@ end
 function loveframes.util.GetCollisions(object, t)
 
 	local x, y = love.mouse.getPosition()
+	local curstate = loveframes.state
 	local object = object or loveframes.base
+	local visible = object.visible
+	local children = object.children
+	local internals = object.internals
+	local objectstate = object.state
 	local t = t or {}
 	
-	-- add the current object if colliding
-	if object.visible == true then
-	
-		local col = loveframes.util.BoundingBox(x, object.x, y, object.y, 1, object.width, 1, object.height)
-		
-		if col == true and object.collide ~= false then
-			if object.clickbounds then
-				local clickcol = loveframes.util.BoundingBox(x, object.clickbounds.x, y, object.clickbounds.y, 1, object.clickbounds.width, 1, object.clickbounds.height)
+	if objectstate == curstate and visible then
+		local objectx = object.x
+		local objecty = object.y
+		local objectwidth = object.width
+		local objectheight = object.height
+		local col = loveframes.util.BoundingBox(x, objectx, y, objecty, 1, objectwidth, 1, objectheight)
+		local collide = object.collide
+		if col and collide then
+			local clickbounds = object.clickbounds
+			if clickbounds then
+				local cx = clickbounds.x
+				local cy = clickbounds.y
+				local cwidth = clickbounds.width
+				local cheight = clickbounds.height
+				local clickcol = loveframes.util.BoundingBox(x, cx, y, cy, 1, cwidth, 1, cheight)
 				if clickcol then
 					table.insert(t, object)
 				end
@@ -69,29 +81,19 @@ function loveframes.util.GetCollisions(object, t)
 				table.insert(t, object)
 			end
 		end
-		
-	end
-	
-	-- check for children
-	if object.children then
-	
-		for k, v in ipairs(object.children) do
-			if v.visible then
+		if children then
+			for k, v in ipairs(children) do
 				loveframes.util.GetCollisions(v, t)
 			end
 		end
-		
-	end
-	
-	-- check for internals
-	if object.internals then
-	
-		for k, v in ipairs(object.internals) do
-			if v.visible and v.type ~= "tooltip" then
-				loveframes.util.GetCollisions(v, t)
+		if internals then
+			for k, v in ipairs(internals) do
+				local type = v.type
+				if type ~= "tooltip" then
+					loveframes.util.GetCollisions(v, t)
+				end
 			end
 		end
-		
 	end
 	
 	return t
@@ -105,18 +107,20 @@ end
 function loveframes.util.GetAllObjects(object, t)
 	
 	local object = object or loveframes.base
+	local internals = object.internals
+	local children = object.children
 	local t = t or {}
 	
 	table.insert(t, object)
 	
-	if object.internals then
-		for k, v in ipairs(object.internals) do
+	if internals then
+		for k, v in ipairs(internals) do
 			loveframes.util.GetAllObjects(v, t)
 		end
 	end
 	
-	if object.children then
-		for k, v in ipairs(object.children) do
+	if children then
+		for k, v in ipairs(children) do
 			loveframes.util.GetAllObjects(v, t)
 		end
 	end
@@ -128,29 +132,26 @@ end
 --[[---------------------------------------------------------
 	- func: GetDirectoryContents(directory, table)
 	- desc: gets the contents of a directory and all of
-			it's subdirectories
+			its subdirectories
 --]]---------------------------------------------------------
 function loveframes.util.GetDirectoryContents(dir, t)
 
-	local dir   = dir
-	local t     = t or {}
+	local dir = dir
+	local t = t or {}
 	local files = love.filesystem.enumerate(dir)
-	local dirs  = {}
+	local dirs = {}
 	
 	for k, v in ipairs(files) do
-	
 		local isdir = love.filesystem.isDirectory(dir.. "/" ..v)
-		
 		if isdir == true then
 			table.insert(dirs, dir.. "/" ..v)
 		else
-			local parts     = loveframes.util.SplitString(v, "([.])")
+			local parts = loveframes.util.SplitString(v, "([.])")
 			local extension = parts[#parts]
-			parts[#parts]   = nil
-			local name      = table.concat(parts)
+			parts[#parts] = nil
+			local name = table.concat(parts)
 			table.insert(t, {path = dir, fullpath = dir.. "/" ..v, requirepath = dir .. "." ..name, name = name, extension = extension})
 		end
-		
 	end
 	
 	if #dirs > 0 then
@@ -172,8 +173,12 @@ end
 function loveframes.util.Round(num, idp)
 
 	local mult = 10^(idp or 0)
-    if num >= 0 then return math.floor(num * mult + 0.5) / mult
-    else return math.ceil(num * mult - 0.5) / mult end
+	
+    if num >= 0 then 
+		return math.floor(num * mult + 0.5) / mult
+    else 
+		return math.ceil(num * mult - 0.5) / mult 
+	end
 	
 end
 
@@ -187,7 +192,6 @@ function loveframes.util.SplitString(str, pat)
 	local t = {}  -- NOTE: use {n = 0} in Lua-5.0
 	
 	if pat == " " then
-	
 		local fpat = "(.-)" .. pat
 		local last_end = 1
 		local s, e, cap = str:find(fpat, 1)
@@ -205,9 +209,7 @@ function loveframes.util.SplitString(str, pat)
 			cap = str:sub(last_end)
 			table.insert(t, cap)
 		end
-		
 	else
-	
 		local fpat = "(.-)" .. pat
 		local last_end = 1
 		local s, e, cap = str:find(fpat, 1)
@@ -222,22 +224,9 @@ function loveframes.util.SplitString(str, pat)
 			cap = str:sub(last_end)
 			table.insert(t, cap)
 		end
-		
 	end
 	
 	return t
-	
-end
-
---[[---------------------------------------------------------
-	- func: TrimString(string)
-	- desc: trims spaces off of the beginning and end of
-			a string
-	- note: i take no credit for this function
---]]---------------------------------------------------------
-function loveframes.util.TrimString(s)
-
-	return (s:gsub("^%s*(.-)%s*$", "%1"))
 	
 end
 
@@ -280,3 +269,28 @@ function loveframes.util.Error(message)
 	error("[Love Frames] " ..message)
 	
 end
+
+--[[---------------------------------------------------------
+	- func: loveframes.util.GetCollisionCount()
+	- desc: gets the total number of objects colliding with
+			the mouse
+--]]---------------------------------------------------------
+function loveframes.util.GetCollisionCount()
+
+	local collisioncount = loveframes.collisioncount
+	return collisioncount
+
+end
+
+--[[---------------------------------------------------------
+	- func: loveframes.util.GetHover()
+	- desc: returns loveframes.hover, can be used to check
+			if the mouse is colliding with a visible
+			Love Frames object
+--]]---------------------------------------------------------
+function loveframes.util.GetHover()
+
+	return loveframes.hover
+	
+end
+	
