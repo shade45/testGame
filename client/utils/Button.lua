@@ -93,7 +93,7 @@ end
 
 --MouseReleased
 function Button:mousereleased(x, y, button)
-	if self.down and self.onClick then self.onClick() end
+	if self.down and self.onClick and self.hover then self.onClick() end
 	self.down = false
 end
 
