@@ -16,12 +16,6 @@ end
 
 --Load
 function MenuState:load()
-	font = love.graphics.newImageFont("fonts/imgfont1.png",
-    " abcdefghijklmnopqrstuvwxyz" ..
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0" ..
-    "123456789.,!?-+/():;%&`'*#=[]\"")
-	
-	love.graphics.setFont(font)
 end
 
 --Close

@@ -7,6 +7,8 @@ require("states/gameState")
 require("states/startState")
 
 function love.load()
+	font = love.graphics.newFont("fonts/babyblue.ttf",16)	
+	love.graphics.setFont(font)
 	--Add Gamestates Here
 	addState(MenuState, "start")
 	addState(GameState, "game")

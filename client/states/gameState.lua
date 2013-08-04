@@ -41,6 +41,10 @@ end
 
 --KeyPressed
 function GameState:keypressed(key, unicode)
+	if key == "escape" then
+		disableState("game")
+		love.event.push("quit") 
+	end
 end
 
 --KeyReleased
