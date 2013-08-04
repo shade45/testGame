@@ -1,2 +1,2 @@
-zip -9 -q -r client.love
-./client.love
+zip -9 -q -r client.love .
+chmod +x client.love
