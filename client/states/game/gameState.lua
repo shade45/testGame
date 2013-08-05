@@ -112,6 +112,8 @@ function GameState:mousereleased(x, y, button)
 		player.x = x
 		player.y = y
 		conn:send("addSelf//"..x..","..y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"..player.name.."//"..player.state)
+		
+		subState = "playing"
 	end
 end
 
@@ -132,7 +134,7 @@ function clientRecv(data)
 	data = string.explode(data, "//")
 	
 	if data[1] == "addPlayer" then
-		print("adding player to list")
+		
 		local clientid, x, y, r, g, b, name, state
 		clientid = data[2]
 		pos = string.explode(data[3], ",")
@@ -143,6 +145,7 @@ function clientRecv(data)
 		state = data[6]
 		
 		if clientid ~= myID then
+			print("adding player to list")
 			local newPlayer = Player:new(x,y,color,name,state)
 			players[clientid] = newPlayer
 		end
