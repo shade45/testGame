@@ -7,9 +7,9 @@ function love.load()
 	numConnected = 0
 	players = {}
 	
-	conn = lube.udpServer()
+	conn = lube.tcpServer()
 	conn.handshake = "test handshake"
-	conn:setPing(true, 2, "areYouStillThere?\n")
+	conn:setPing(true, 2, "pingtest\n")
 	conn:listen(25565)
 	conn.callbacks.recv = serverRecv
 	conn.callbacks.connect = function()
@@ -31,65 +31,74 @@ function love.draw()
 end
 
 function serverRecv(data, clientid)
-	--print("["..clientid.."] received data: "..data)
-	data = string.explode(data, "//")
-	if data[1] == "getPlayers" then
-		print("["..clientid.."] requested player list")
-		--send players one by one to the connected player
-		for i,player in pairs(players) do
-			conn:send("addPlayer//"..i.."//"..player.x..","..player.y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"
-					   ..player.name.."//"..player.state,clientid)
+	local ip, port = clientid:getpeername()
+	clientip = ip .. ":" .. port
+	
+	print("["..clientip.."] received data: "..data)
+	datas = string.explode(data, "\n")
+	
+	for i, data in pairs(datas) do
+		data = string.explode(data, "//")
+		if data[1] == "getPlayers" then
+			print("["..clientip.."] requested player list")
+			--send players one by one to the connected player
+			for i,player in pairs(players) do
+				conn:send("addPlayer//"..i.."//"..player.x..","..player.y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"
+						   ..player.name.."//"..player.state.."\n",clientid)
+			end
+			conn:send("yourID//"..clientip.."\n",clientid)
+			conn:send("endOfPlayerList\n",clientid)
+		elseif data[1] == "addSelf" then
+			print("["..clientip.."] adding self to players")
+			--add player to list, send to everyone
+			local x, y, r, g, b, name, state
+			pos = string.explode(data[2], ",")
+			x = pos[1]
+			y = pos[2]
+			color = string.explode(data[3], ",")
+			name = data[4]
+			state = data[5]
+			
+			local newPlayer = Player:new(x,y,color,name,state)
+			players[clientip] = newPlayer
+			conn:send("addPlayer//"..clientip.."//"..x..","..y.."//"..color[1]..","..color[2]..","..color[3].."//"..name.."//"..state.."\n")
+		elseif data[1] == "updatePos" then
+			local x = data[2]
+			local y = data[3]
+			
+			players[clientip]:updatePos(x,y)
+			
+			conn:send("updatePos//" .. clientip .. "//" .. x .. "//" .. y.."\n")
+		elseif data[1] == "updateState" then
+			print("["..clientip.."] updated state")
+			local state = data[2]
+			
+			players[clientip]:updateState(state)
+			
+			conn:send("updateState//" .. clientip .. "//" .. state.."\n")
+		elseif data[1] == "updateTrail" then
+			local ct = data[2]
+			local x1 = data[3]
+			local y1 = data[4]
+			local x2 = data[5]
+			local y2 = data[6]
+			local dir = data[7]
+			
+			players[clientip]:updateTrail(ct, {x1,y1,x2,y2,dir})
+			
+			conn:send("updateTrail//" .. clientip .. "//" ..ct .."//"..x1.."//"..y1.."//"..x2.."//"..y2.."//"..dir.."\n")
 		end
-		conn:send("yourID//"..clientid,clientid)
-		conn:send("endOfPlayerList",clientid)
-	elseif data[1] == "addSelf" then
-		print("["..clientid.."] adding self to players")
-		--add player to list, send to everyone
-		local x, y, r, g, b, name, state
-		pos = string.explode(data[2], ",")
-		x = pos[1]
-		y = pos[2]
-		color = string.explode(data[3], ",")
-		name = data[4]
-		state = data[5]
-		
-		local newPlayer = Player:new(x,y,color,name,state)
-		players[clientid] = newPlayer
-		conn:send("addPlayer//"..clientid.."//"..x..","..y.."//"..color[1]..","..color[2]..","..color[3].."//"..name.."//"..state)
-	elseif data[1] == "updatePos" then
-		local x = data[2]
-		local y = data[3]
-		
-		players[clientid]:updatePos(x,y)
-		
-		conn:send("updatePos//" .. clientid .. "//" .. x .. "//" .. y)
-	elseif data[1] == "updateState" then
-		print("["..clientid.."] updated state")
-		local state = data[2]
-		
-		players[clientid]:updateState(state)
-		
-		conn:send("updateState//" .. clientid .. "//" .. state)
-	elseif data[1] == "updateTrail" then
-		local ct = data[2]
-		local x1 = data[3]
-		local y1 = data[4]
-		local x2 = data[5]
-		local y2 = data[6]
-		local dir = data[7]
-		
-		players[clientid]:updateTrail(ct, {x1,y1,x2,y2,dir})
-		
-		conn:send("updateTrail//" .. clientid .. "//" ..ct .."//"..x1.."//"..y1.."//"..x2.."//"..y2.."//"..dir)
 	end
 	
 end
 
 function clientDC(clientid)
-	print("["..clientid.."] disconnected")
+	local ip, port = clientid:getpeername()
+	clientip = ip .. ":" .. port
+	print("["..clientip.."] disconnected")
 	numConnected = numConnected + 1
-	players[clientid] = nil
-	conn:send("removePlayer//"..clientid)
+	players[clientip] = nil
+	conn:send("removePlayer//"..clientip.."\n")
 end
 
 function string.explode(str, div)
