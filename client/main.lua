@@ -3,7 +3,9 @@ require("libs/lovelyMoon/stateManager")
 require("libs/lovelyMoon/lovelyMoon")
 
 smallFont = 	love.graphics.newFont("fonts/visitor1.ttf",10)
-defaultFont = 	love.graphics.newFont("fonts/bitmap1.ttf",16)	
+defaultFont = 	love.graphics.newFont("fonts/bitmap1.ttf",16)
+smallMedFont = 	love.graphics.newFont("fonts/visitor1.ttf",10)	
+mediumFont = 	love.graphics.newFont("fonts/visitor1.ttf",20)
 bigFont = 		love.graphics.newFont("fonts/visitor1.ttf",30)
 debugFont = 	love.graphics.newFont("fonts/visitor1.ttf",10)
 

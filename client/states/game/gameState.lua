@@ -1,6 +1,8 @@
 Class = require "libs/hump/class"
 require "libs/LUBE/LUBE"
+
 require "player/Player"
+require "gui/PlayerList"
 
 --Table
 GameState = {}
@@ -27,11 +29,13 @@ end
 --Enable
 function GameState:enable()
 	myID = ""
-	spawnCursor = love.graphics.newImage("gui/spawnCursor.png")
+	spawnCursor = love.graphics.newImage("gui/images/spawnCursor.png")
 	subState = "connecting"
 	loveframes.SetState("game")
 	player = Player:new(0,0,playerColor,playerName,"idle")
 	players = {}
+	playerCount = 1
+	playerList = PlayerList:new()
 	connectToServer()	
 end
 
@@ -61,22 +65,30 @@ function GameState:draw()
 		love.graphics.setFont(bigFont)
 		love.graphics.setColor(textColor) 
 		love.graphics.printf("receiving data.. (if you can see this, server is probably not responding)", winX/2 - 400, winY/2, 800, "center")
-	elseif subState == "spawning" then 
-		love.graphics.setFont(bigFont)
-		love.graphics.setColor(textColor) 
-		love.graphics.printf("Select your spawn location", winX/2 - 400, 50, 800, "center")
-		love.mouse.setVisible(false)
-		love.graphics.draw(spawnCursor, love.mouse.getX()-10, love.mouse.getY()-10)
 		
+	elseif subState == "spawning" then 			
 		for i,p in pairs(players) do
 			p:draw()
 		end
+		
+		playerList:draw()
+		
+		love.graphics.setColor({0,0,0,100}) 
+		love.graphics.rectangle("fill", 0, 0, winX, winY)		
+		love.graphics.setFont(bigFont)
+		love.graphics.setColor(textColor) 
+		love.graphics.printf("Select your spawn location", winX/2 - 400, 50, 800, "center")
+		
+		love.mouse.setVisible(false)
+		love.graphics.draw(spawnCursor, love.mouse.getX()-10, love.mouse.getY()-10)
 	else
 		for i,p in pairs(players) do
 			p:draw()
 		end
 		
 		player:draw()
+		
+		playerList:draw()
 	end
 	
 	--print debug
@@ -159,6 +171,7 @@ function clientRecv(data)
 			print("adding player to list")
 			local newPlayer = Player:new(x,y,color,name,state)
 			players[clientid] = newPlayer
+			playerCount = playerCount + 1
 		end
 	
 	elseif data[1] == "endOfPlayerList" then
@@ -168,6 +181,7 @@ function clientRecv(data)
 	elseif data[1] == "removePlayer" then
 		playerID = data[2]
 		players[playerID] = nil
+		playerCount = playerCount - 1
 	elseif data[1] == "updatePos" then
 		local clientid = data[2]
 		local x = data[3]
