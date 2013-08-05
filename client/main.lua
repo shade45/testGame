@@ -51,8 +51,9 @@ function love.draw()
 		love.graphics.setColor(255,255,255)
 		love.graphics.print("FPS: " .. love.timer.getFPS(), 0, 0)
 		love.graphics.print("Name: " .. playerName, 0, 8)	
-		love.graphics.print("Color: " .. playerColor[1] .. "," .. playerColor[2] .. "," .. playerColor[3], 0, 16)			
-		love.graphics.print("players: just you...", 0, 24)			
+		love.graphics.print("Color: " .. playerColor[1] .. "," .. playerColor[2] .. "," .. playerColor[3], 0, 16)
+		playersStr = (players and table.getn(players) or "just you... bro")
+		love.graphics.print("players: " ..playersStr, 0, 24)			
 		love.graphics.setFont(defaultFont)
 	end
 	

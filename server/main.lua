@@ -3,6 +3,7 @@ require "libs/LUBE/LUBE"
 require "player/Player"
 
 function love.load()
+	love.graphics.setBackgroundColor(48,53,59)
 	numConnected = 0
 	players = {}
 	
@@ -30,7 +31,7 @@ function love.draw()
 end
 
 function serverRecv(data, clientid)
-	print("["..clientid.."] received data: "..data)
+	--print("["..clientid.."] received data: "..data)
 	data = string.explode(data, "//")
 	if data[1] == "getPlayers" then
 		print("["..clientid.."] requested player list")
@@ -55,6 +56,20 @@ function serverRecv(data, clientid)
 		local newPlayer = Player:new(x,y,color,name,state)
 		players[clientid] = newPlayer
 		conn:send("addPlayer//"..clientid.."//"..x..","..y.."//"..color[1]..","..color[2]..","..color[3].."//"..name.."//"..state)
+	elseif data[1] == "updatePos" then
+		local x = data[2]
+		local y = data[3]
+		
+		players[clientid]:updatePos(x,y)
+		
+		conn:send("updatePos//" .. clientid .. "//" .. x .. "//" .. y)
+	elseif data[1] == "updateState" then
+		print("["..clientid.."] updated state")
+		local state = data[2]
+		
+		players[clientid]:updateState(state)
+		
+		conn:send("updateState//" .. clientid .. "//" .. state)
 	end
 end
 
@@ -62,7 +77,7 @@ function clientDC(clientid)
 	print("["..clientid.."] disconnected")
 	numConnected = numConnected + 1
 	players[clientid] = nil
-	conn:send("//removePlayer//"..clientid)
+	conn:send("removePlayer//"..clientid)
 end
 
 function string.explode(str, div)

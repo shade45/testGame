@@ -17,8 +17,13 @@ end
 
 
 
-function Player:update(dt)
-	
+function Player:updatePos(_x,_y)
+	self.x = _x
+	self.y = _y
+end
+
+function Player:updateState(_state)
+	self.state= _state
 end
 
 function Player:draw()

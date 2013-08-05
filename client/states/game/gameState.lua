@@ -44,8 +44,10 @@ function GameState:update(dt)
 	if subState == "sending request" then
 		conn:send("getPlayers")
 		subState = "receiving data"
-	elseif subState == "spawning" then
+	elseif subState == "playing" then
+		player:update(dt)
 		
+		conn:send("updatePos//"..player.x.."//"..player.y)
 	end
 	
 	conn:update(dt)
@@ -53,24 +55,20 @@ end
 
 --Draw
 function GameState:draw()
-	if subState == "connecting" then
-		love.graphics.setFont(bigFont)
-		love.graphics.setColor(textColor)
-		love.graphics.printf("connecting to server...", winX/2 - 400, winY/2, 800, "center")
-	elseif subState == "sending request" then 
-		love.graphics.setFont(bigFont)
-		love.graphics.setColor(textColor)
-		love.graphics.printf("sending request for data...", winX/2 - 400, winY/2, 800, "center")
-	elseif subState == "receiving data" then 
+	if subState == "receiving data" then
 		love.graphics.setFont(bigFont)
 		love.graphics.setColor(textColor) 
-		love.graphics.printf("receiving data...", winX/2 - 400, winY/2, 800, "center")
+		love.graphics.printf("receiving data.. (if you can see this, server is probably not responding)", winX/2 - 400, winY/2, 800, "center")
 	elseif subState == "spawning" then 
 		love.graphics.setFont(bigFont)
 		love.graphics.setColor(textColor) 
 		love.graphics.printf("Select your spawn location", winX/2 - 400, 50, 800, "center")
 		love.mouse.setVisible(false)
 		love.graphics.draw(spawnCursor, love.mouse.getX()-10, love.mouse.getY()-10)
+		
+		for i,p in pairs(players) do
+			p:draw()
+		end
 	else
 		for i,p in pairs(players) do
 			p:draw()
@@ -95,10 +93,17 @@ function GameState:keypressed(key, unicode)
 		conn:disconnect()
 		love.event.push("quit") 
 	end
+	
+	if subState == "playing" then
+		player:keypressed(key, unicode)
+	end
 end
 
 --KeyReleased
 function GameState:keyreleased(key, unicode)
+	if subState == "playing" then
+		player:keyreleased(key, unicode)
+	end
 end
 
 --MousePressed
@@ -114,6 +119,7 @@ function GameState:mousereleased(x, y, button)
 		conn:send("addSelf//"..x..","..y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"..player.name.."//"..player.state)
 		
 		subState = "playing"
+		love.mouse.setVisible(true)
 	end
 end
 
@@ -129,7 +135,7 @@ function connectToServer()
 end
 
 function clientRecv(data)
-	print("received data: "..data)
+	--print("received data: "..data)
 	--data = data:match("^(.-)\n*$")
 	data = string.explode(data, "//")
 	
@@ -154,5 +160,23 @@ function clientRecv(data)
 		subState = "spawning"
 	elseif data[1] == "yourID" then
 		myID = data[2]
+	elseif data[1] == "removePlayer" then
+		playerID = data[2]
+		players[playerID] = nil
+	elseif data[1] == "updatePos" then
+		local clientid = data[2]
+		local x = data[3]
+		local y = data[4]
+		
+		if clientid ~= myID then
+			players[clientid]:updatePos(x,y)
+		end
+	elseif data[1] == "updateState" then
+		local clientid = data[2]
+		local state = data[3]
+		
+		if clientid ~= myID then
+			players[clientid]:updateState(state)
+		end
 	end
 end
