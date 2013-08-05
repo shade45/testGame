@@ -9,7 +9,7 @@ function love.load()
 	
 	conn = lube.udpServer()
 	conn.handshake = "test handshake"
-	conn:setPing(true, 16, "areYouStillThere?\n")
+	conn:setPing(true, 2, "areYouStillThere?\n")
 	conn:listen(25565)
 	conn.callbacks.recv = serverRecv
 	conn.callbacks.connect = function()
@@ -70,7 +70,19 @@ function serverRecv(data, clientid)
 		players[clientid]:updateState(state)
 		
 		conn:send("updateState//" .. clientid .. "//" .. state)
+	elseif data[1] == "updateTrail" then
+		local ct = data[2]
+		local x1 = data[3]
+		local y1 = data[4]
+		local x2 = data[5]
+		local y2 = data[6]
+		local dir = data[7]
+		
+		players[clientid]:updateTrail(ct, {x1,y1,x2,y2,dir})
+		
+		conn:send("updateTrail//" .. clientid .. "//" ..ct .."//"..x1.."//"..y1.."//"..x2.."//"..y2.."//"..dir)
 	end
+	
 end
 
 function clientDC(clientid)

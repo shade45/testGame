@@ -9,7 +9,9 @@ function Player:new(_x, _y, _color, _name, _state)
 		color = {_color[1], _color[2], _color[3]},
 		state = _state,
 		name = _name,
-		speed = 100
+		speed = 200,
+		curTrail = 0,
+		trails = {}
 	}	
 	
 	setmetatable(object, { __index = Player })
@@ -29,6 +31,9 @@ function Player:update(dt)
 		self.x = self.x - self.speed*dt
 	end
 	
+	self.trails[self.curTrail][3] = self.x
+	self.trails[self.curTrail][4] = self.y
+	
 	if (self.x < 0 or self.x > winX or self.y < 0 or self.y > winY) then
 		print("die")
 		subState = "spawning"
@@ -38,10 +43,29 @@ end
 
 --KeyPressed
 function Player:keypressed(key, unicode)
-	if (key == "up" or key == "w") and (self.dir == "E" or self.dir == "W") then self.dir = "N" end
-	if (key == "right" or key == "d") and (self.dir == "N" or self.dir == "S") then self.dir = "E" end
-	if (key == "down" or key == "s") and (self.dir == "E" or self.dir == "W") then self.dir = "S" end
-	if (key == "left" or key == "a") and (self.dir == "N" or self.dir == "S") then self.dir = "W" end
+	if (key == "up" or key == "w") and (self.dir == "E" or self.dir == "W") then
+		self.dir = "N"
+		self.curTrail = self.curTrail + 1
+		player.trails[self.curTrail] = {self.x,self.y,self.x,self.y, self.dir}
+	end
+	
+	if (key == "right" or key == "d") and (self.dir == "N" or self.dir == "S") then
+		self.dir = "E"
+		self.curTrail = self.curTrail + 1
+		player.trails[self.curTrail] = {self.x,self.y,self.x,self.y, self.dir}
+	end
+	
+	if (key == "down" or key == "s") and (self.dir == "E" or self.dir == "W") then
+		self.dir = "S"
+		self.curTrail = self.curTrail + 1
+		player.trails[self.curTrail] = {self.x,self.y,self.x,self.y, self.dir}
+	end
+	
+	if (key == "left" or key == "a") and (self.dir == "N" or self.dir == "S") then
+		self.dir = "W"
+		self.curTrail = self.curTrail + 1
+		player.trails[self.curTrail] = {self.x,self.y,self.x,self.y, self.dir}
+	end
 end
 
 --KeyReleased
@@ -57,6 +81,10 @@ function Player:updateState(_state)
 	self.state= _state
 end
 
+function Player:updateTrail(ct, trail)
+	self.trails[ct] = trail
+end
+
 function Player:draw()
 	if self.state == "playing" then
 		love.graphics.setColor({self.color[1],self.color[2],self.color[3],15})
@@ -67,6 +95,29 @@ function Player:draw()
 		love.graphics.rectangle("fill", self.x - 6, self.y - 6, 12, 12)
 		love.graphics.setColor(self.color)
 		love.graphics.rectangle("fill", self.x - 5, self.y - 5, 10, 10)
+		
+		--draw trails
+		for i, trail in pairs(self.trails) do
+			local x1, y1, x2, y2, dir, x1dir, y1dir, x2dir, y2dir
+			
+			x1 = trail[1]
+			y1 = trail[2]
+			x2 = trail[3]
+			y2 = trail[4]
+			dir = trail[5]
+
+			love.graphics.setColor(self.color)
+			if dir == "N" then 
+				love.graphics.rectangle("fill", x2 - 3, y2 - 3, 6, y1-y2 + 6)			
+			elseif dir == "E" then
+				love.graphics.rectangle("fill", x1 - 3, y1 - 3, x2-x1 + 6, 6)
+			elseif dir == "S" then
+				love.graphics.rectangle("fill", x1 - 3, y1 - 3, 6, y2-y1 + 6)
+			else 
+				love.graphics.rectangle("fill", x2 - 3, y2 - 3, x1-x2 + 6, 6)
+			end
+
+		end
 	end
 end
 

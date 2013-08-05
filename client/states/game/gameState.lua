@@ -48,6 +48,8 @@ function GameState:update(dt)
 		player:update(dt)
 		
 		conn:send("updatePos//"..player.x.."//"..player.y)
+		ct = player.curTrail
+		conn:send("updateTrail//"..ct .."//"..player.trails[ct][1].."//"..player.trails[ct][2].."//"..player.trails[ct][3].."//"..player.trails[ct][4].."//"..player.trails[ct][5])
 	end
 	
 	conn:update(dt)
@@ -80,8 +82,10 @@ function GameState:draw()
 	--print debug
 	if (DEBUG) then
 		love.graphics.setFont(debugFont)
+		love.graphics.setColor({255,255,255})
 		love.graphics.print("subState: " .. subState, 0, 32)		
-		love.graphics.print("position: " .. player.x .. "," .. player.y, 0, 40)				
+		love.graphics.print("position: " .. math.floor(player.x + 0.5).. "," .. math.floor(player.y + 0.5), 0, 40)			
+		love.graphics.print("trails: " .. table.getn(player.trails), 0, 48)				
 		love.graphics.setFont(defaultFont)
 	end
 end
@@ -116,6 +120,9 @@ function GameState:mousereleased(x, y, button)
 		player.state = "playing"
 		player.x = x
 		player.y = y
+		player.curTrail = 1
+		player.trails = {}
+		player.trails[1] = {x,y,x,y, player.dir}
 		conn:send("addSelf//"..x..","..y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"..player.name.."//"..player.state)
 		
 		subState = "playing"
@@ -128,15 +135,13 @@ function connectToServer()
 		
 	conn = lube.udpClient()
 	conn.handshake = "test handshake"
-	conn:setPing(true, 2, "areYouStillThere?\n")
+	conn:setPing(true, 1, "areYouStillThere?\n")
 	assert(conn:connect(host, 25565, true))
 	conn.callbacks.recv = clientRecv
 	subState = "sending request"
 end
 
 function clientRecv(data)
-	--print("received data: "..data)
-	--data = data:match("^(.-)\n*$")
 	data = string.explode(data, "//")
 	
 	if data[1] == "addPlayer" then
@@ -178,5 +183,32 @@ function clientRecv(data)
 		if clientid ~= myID then
 			players[clientid]:updateState(state)
 		end
+	elseif data[1] == "updateTrail" then
+		local clientid = data[2]
+		local ct = data[3]
+		local x1 = data[4]
+		local y1 = data[5]
+		local x2 = data[6]
+		local y2 = data[7]
+		local dir = data[8]
+		
+		if clientid ~= myID then
+			players[clientid]:updateTrail(ct, {x1,y1,x2,y2,dir})
+		end
 	end
+end
+
+-- Print contents of `tbl`, with indentation.
+-- `indent` sets the initial level of indentation.
+function tprint (tbl, indent)
+  if not indent then indent = 0 end
+  for k, v in pairs(tbl) do
+    formatting = string.rep("  ", indent) .. k .. ": "
+    if type(v) == "table" then
+      print(formatting)
+      tprint(v, indent+1)
+    else
+      print(formatting .. v)
+    end
+  end
 end
