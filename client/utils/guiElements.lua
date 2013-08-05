@@ -30,8 +30,8 @@ end
 
 -- draw the elements
 function guiElements:draw()
-	for i,_ in pairs(self.sliders) do
-		self.sliders[i]:draw()
+	for i,slider in pairs(self.sliders) do
+		slider:draw()
 	end
 	
 	for i,_ in pairs(self.buttons) do
