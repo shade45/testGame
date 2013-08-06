@@ -44,12 +44,12 @@ function Player:update(dt)
 	end
 	
 	--check collision with self
-	--[[collission = false
+	collission = false
 	collided = 0
 	myTrail = self.trails[self.curTrail]
 	for i, trail in pairs(self.trails) do
 		if self.curTrail > (i+1) then
-			if LineIntersection(myTrail[1], myTrail[2], myTrail[3], myTrail[4], trail[1], trail[2], trail[3], trail[4]) then
+			if isIntersecting(myTrail[1], myTrail[2], myTrail[3], myTrail[4], myTrail[5], trail[1], trail[2], trail[3], trail[4], trail[5]) then
 				collission = true 
 				collided = i
 				print('('..myTrail[1]..','.. myTrail[2]..') ('.. myTrail[3]..','.. myTrail[4]..") collided with (" ..trail[1]..','.. trail[2]..') ('.. trail[3]..','.. trail[4])
@@ -62,7 +62,7 @@ function Player:update(dt)
 		print("collided with trail " .. collided)
 		subState = "spawning"
 		conn:send("updateState//" .. "spawning")
-	end]]--
+	end
 	
 end
 
@@ -146,52 +146,4 @@ function Player:draw()
 	end
 end
 
-function lineIntersect(x1,y1,x2,y2, x3,y3,x4,y4)
-    x=((x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4))
-    y=((x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4))
-	
-    if (tonumber(x) == nil or tonumber(y) == nil) then
-        return false
-    else
-        if (x1>=x2) then
-            if (not (x2<=x and x<=x1)) then return false end
-        else
-            if (not (x1<=x and x<=x2)) then return false end
-        end
-		
-        if (y1>=y2) then
-            if (not (y2<=y and y<=y1)) then return false end
-        else
-            if (not (y1<=y and y<=y2)) then return false end
-        end
-		
-        if (x3>=x4) then
-            if (not (x4<=x and x<=x3)) then return false end
-        else
-            if (not (x3<=x and x<=x4)) then return false end
-        end
-		
-        if (y3>=y4) then
-            if (not (y4<=y and y<=y3)) then return false end
-        else
-            if (not (y3<=y and y<=y4)) then return false end
-        end
-    
-	end
-	
-    return true
-end
 
-function IsIntersecting(aX,aY,bX,bY,cX,cY,dX,dY)
-    denominator = ((bX - aX) * (dY - cY)) - ((bY - aY) * (dX - cX))
-    numerator1 = ((aY - cY) * (dX - cX)) - ((aX - cX) * (dY - cY))
-    numerator2 = ((aY - cY) * (bX - aX)) - ((aX - cX) * (bY - aY))
-
-    -- Detect coincident lines (has a problem, read below)
-    if (denominator == 0) then return numerator1 == 0 and numerator2 == 0 end
-
-    r = numerator1 / denominator
-    s = numerator2 / denominator
-
-    return (r > 0 and r < 1) and (s > 0 and s < 1)
-end
