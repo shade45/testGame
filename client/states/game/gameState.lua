@@ -29,6 +29,7 @@ end
 --Enable
 function GameState:enable()
 	myID = ""
+	partialMsg = ""
 	spawnCursor = love.graphics.newImage("gui/images/spawnCursor.png")
 	subState = "connecting"
 	loveframes.SetState("game")
@@ -46,14 +47,14 @@ end
 --Update
 function GameState:update(dt)
 	if subState == "sending request" then
-		conn:send("getPlayers\n")
+		conn:send("getPlayers//end\n")
 		subState = "receiving data"
 	elseif subState == "playing" then
 		player:update(dt)
 		
-		conn:send("updatePos//"..player.x.."//"..player.y.."\n")
+		conn:send("updatePos//"..player.x.."//"..player.y.."//end\n")
 		ct = player.curTrail
-		conn:send("updateTrail//"..ct .."//"..player.trails[ct][1].."//"..player.trails[ct][2].."//"..player.trails[ct][3].."//"..player.trails[ct][4].."//"..player.trails[ct][5].."\n")
+		conn:send("updateTrail//"..ct .."//"..player.trails[ct][1].."//"..player.trails[ct][2].."//"..player.trails[ct][3].."//"..player.trails[ct][4].."//"..player.trails[ct][5].."//end\n")
 	end
 	
 	conn:update(dt)
@@ -135,7 +136,7 @@ function GameState:mousereleased(x, y, button)
 		player.curTrail = 1
 		player.trails = {}
 		player.trails[1] = {x,y,x,y, player.dir}
-		conn:send("addSelf//"..x..","..y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"..player.name.."//"..player.state.."\n")
+		conn:send("addSelf//"..x..","..y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"..player.name.."//"..player.state.."//end\n")
 		
 		subState = "playing"
 		love.mouse.setVisible(true)
@@ -147,19 +148,32 @@ function connectToServer()
 		
 	conn = lube.tcpClient()
 	conn.handshake = "test handshake"
-	conn:setPing(true, 1, "pingtest\n")
+	conn:setPing(true, 1, "pingtest//end\n")
 	assert(conn:connect(host, 25565, true))
 	conn.callbacks.recv = clientRecv
 	subState = "sending request"
 end
 
 function clientRecv(data)
-	print("received data: "..data)
+	--print("[".. os.date("%X") .."]received data: "..data)
+	
+	if partialMsg ~= "" then
+		print("concatenated partial msg '" .. partialMsg .."' with data '" .. data .."'")
+		data = partialMsg .. data
+		partialMsg = ""
+	end
 	
 	datas = string.explode(data, "\n")
 	
-	for i, data in pairs(datas) do	
+	for i, data in pairs(datas) do
+		dataStr = data
 		data = string.explode(data, "//")
+		
+		-- check if msg is complete, if not, wait for rest of message
+		if data[table.getn(data)] ~= "end" then
+			partialMsg = dataStr
+			return
+		end
 		
 		if data[1] == "addPlayer" then
 			
