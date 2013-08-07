@@ -2,6 +2,7 @@ Class = require "libs/hump/class"
 require "libs/LUBE/LUBE"
 
 require "player/Player"
+require "player/Enemy"
 require "gui/PlayerList"
 
 --Table
@@ -52,9 +53,16 @@ function GameState:update(dt)
 	elseif subState == "playing" then
 		player:update(dt)
 		
+		
+		
 		conn:send("updatePos//"..player.x.."//"..player.y.."//end\n")
 		ct = player.curTrail
 		conn:send("updateTrail//"..ct .."//"..player.trails[ct][1].."//"..player.trails[ct][2].."//"..player.trails[ct][3].."//"..player.trails[ct][4].."//"..player.trails[ct][5].."//end\n")
+	end
+	
+	--update enemies (approximate their position based on their velocity)
+	for i, enemy in pairs (players) do
+		enemy:update(dt)
 	end
 	
 	conn:update(dt)
@@ -188,7 +196,7 @@ function clientRecv(data)
 			
 			if clientid ~= myID then
 				print("adding player to list")
-				local newPlayer = Player:new(x,y,color,name,state)
+				local newPlayer = Enemy:new(x,y,color,name,state)
 				players[clientid] = newPlayer
 				playerCount = playerCount + 1
 			end
@@ -227,6 +235,13 @@ function clientRecv(data)
 			
 			if clientid ~= myID then
 				players[clientid]:updateTrail(ct, {x1,y1,x2,y2,dir})
+			end
+		elseif data[1] == "updateDirection" then
+			local clientid = data[2]
+			local dir = data[3]
+			
+			if clientid ~= myID then
+				players[clientip]:updateDirection(dir)
 			end
 		end
 	end

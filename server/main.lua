@@ -102,6 +102,12 @@ function serverRecv(data, clientid)
 			players[clientip]:updateTrail(ct, {x1,y1,x2,y2,dir})
 			
 			conn:send("updateTrail//" .. clientip .. "//" ..ct .."//"..x1.."//"..y1.."//"..x2.."//"..y2.."//"..dir.."//end\n")
+		elseif data[1] == "updateDirection" then
+			local dir = data[2]
+			
+			players[clientip]:updateDirection(dir)
+			
+			conn:send("updateDirection//" .. clientip .. "//" .. dir.."//end\n")
 		end
 	end
 	

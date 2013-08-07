@@ -40,7 +40,7 @@ function Player:update(dt)
 	if (self.x < 0 or self.x > winX or self.y < 0 or self.y > winY) then
 		print("die")
 		subState = "spawning"
-		conn:send("updateState//" .. "spawning")
+		conn:send("updateState//spawning//end\n")
 	end
 	
 	--check collision with self
@@ -76,7 +76,7 @@ function Player:update(dt)
 	if (collission) then
 		print("collided with trail " .. collided)
 		subState = "spawning"
-		conn:send("updateState//" .. "spawning")
+		conn:send("updateState//spawning//end\n")
 	end
 	
 end
@@ -85,24 +85,28 @@ end
 function Player:keypressed(key, unicode)
 	if (key == "up" or key == "w") and (self.dir == "E" or self.dir == "W") then
 		self.dir = "N"
+		conn:send("updateDirection//N//end\n")
 		self.curTrail = self.curTrail + 1
 		player.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
 	end
 	
 	if (key == "right" or key == "d") and (self.dir == "N" or self.dir == "S") then
 		self.dir = "E"
+		conn:send("updateDirection//E//end\n")
 		self.curTrail = self.curTrail + 1
 		player.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
 	end
 	
 	if (key == "down" or key == "s") and (self.dir == "E" or self.dir == "W") then
 		self.dir = "S"
+		conn:send("updateDirection//S//end\n")
 		self.curTrail = self.curTrail + 1
 		player.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
 	end
 	
 	if (key == "left" or key == "a") and (self.dir == "N" or self.dir == "S") then
 		self.dir = "W"
+		conn:send("updateDirection//W//end\n")
 		self.curTrail = self.curTrail + 1
 		player.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
 	end
@@ -119,6 +123,10 @@ end
 
 function Player:updateState(_state)
 	self.state= _state
+end
+
+function Player:updateDirection(_dir)
+	self.dir= _dir
 end
 
 function Player:updateTrail(ct, trail)
