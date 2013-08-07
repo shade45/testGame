@@ -72,7 +72,7 @@ function loveframes.load()
 			require(v.requirepath)
 		end
 	end]]--
-	require(dir .. "/templates/base")
+	require(dir .. "/base")
 	
 	-- loop through a list of all gui skins and require them
 	for k, v in ipairs(skins) do
