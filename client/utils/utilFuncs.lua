@@ -19,6 +19,7 @@ end
 
 --determines if two lines intersect, assuming lines only go up and down or across, and line direction is given
 function isIntersecting(x1,y1,x2,y2,dir1, x3,y3,x4,y4,dir2)
+	local x1,y1,x2,y2,x3,y3,x4,y4 = tonumber(x1),tonumber(y1),tonumber(x2),tonumber(y2),tonumber(x3),tonumber(y3),tonumber(x4),tonumber(y4)
     if (dir1 == "S" and dir2 == "S") or (dir1 == "S" and dir2 == "N") or (dir1 == "N" and dir2 == "S") or (dir1 == "N" and dir2 == "N") then
 		if (x1 == x3) then
 			return isBetween(y1,y3,y4) or isBetween(y2,y3,y4)
@@ -41,12 +42,12 @@ end
 -- returns true if numA is between x1 and x2 (inclusive)
 function isBetween(numA, x1,x2)
 	if ((numA >= x1) and (numA <= x2)) then
-		print(x1 .." <= "..numA.." <= ".. x2)
+		--print(x1 .." <= "..numA.." <= ".. x2)
 		return true
 	end
 	
 	if ((numA <= x1) and (numA >= x2)) then
-		print(x1 .." >= "..numA.." >= ".. x2)
+		--print(x1 .." >= "..numA.." >= ".. x2)
 		return true
 	end
 	
