@@ -241,7 +241,7 @@ function clientRecv(data)
 			local dir = data[3]
 			
 			if clientid ~= myID then
-				players[clientip]:updateDirection(dir)
+				players[clientid]:updateDirection(dir)
 			end
 		end
 	end
