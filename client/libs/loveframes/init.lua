@@ -67,11 +67,12 @@ function loveframes.load()
 	end
 	
 	-- loop through a list of all gui templates and require them
-	for k, v in ipairs(templates) do
+	--[[for k, v in ipairs(templates) do
 		if v.extension == "lua" then
 			require(v.requirepath)
 		end
-	end
+	end]]--
+	require(dir .. "/templates/base")
 	
 	-- loop through a list of all gui skins and require them
 	for k, v in ipairs(skins) do
