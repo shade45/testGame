@@ -58,6 +58,19 @@ function Player:update(dt)
 		end
 	end
 	
+	for j, player in pairs(players) do
+		for i, trail in pairs(player.trails) do
+			
+			if isIntersecting(myTrail[1], myTrail[2], myTrail[3], myTrail[4], myTrail[5], trail[1], trail[2], trail[3], trail[4], trail[5]) then
+				collission = true 
+				collided = i
+				print('('..myTrail[1]..','.. myTrail[2]..') ('.. myTrail[3]..','.. myTrail[4]..") collided with (" ..trail[1]..','.. trail[2]..') ('.. trail[3]..','.. trail[4])
+				break
+			end
+
+		end
+	end
+	
 	if (collission) then
 		print("collided with trail " .. collided)
 		subState = "spawning"
