@@ -187,12 +187,15 @@ function clientRecv(data)
 			
 			local clientid, dir, x, y, r, g, b, name, state
 			clientid = data[2]
-			pos = string.explode(data[3], ",")
+			dir = data[3]
+			pos = string.explode(data[4], ",")
 			x = tonumber(pos[1])
 			y = tonumber(pos[2])
-			color = string.explode(data[4], ",")
-			name = data[5]
-			state = data[6]
+			color = string.explode(data[5], ",")
+			name = data[6]
+			state = data[7]
+			
+			print(clientid..","..dir..","..name..","..state)
 			
 			if clientid ~= myID then
 				print("adding player to list")
