@@ -8,7 +8,7 @@ function love.load()
 	numConnected = 0
 	players = {}
 	
-	conn = lube.tcpServer()
+	conn = lube.udpServer()
 	conn.handshake = "test handshake"
 	conn:setPing(true, 2, "pingtest//end\n")
 	conn:listen(25565)
@@ -32,8 +32,8 @@ function love.draw()
 end
 
 function serverRecv(data, clientid)
-	local ip, port = clientid:getpeername()
-	clientip = ip .. ":" .. port
+	--local ip, port = clientid:getpeername()
+	clientip = clientid--ip .. ":" .. port
 	
 	if partialMsg ~= "" then
 		print("concatenated partial msg '" .. partialMsg .."' with data '" .. data .."'")
@@ -41,7 +41,7 @@ function serverRecv(data, clientid)
 		partialMsg = ""
 	end
 	
-	--print("["..clientip.."][".. os.date("%X") .."] received data: "..data)
+	print("["..clientip.."][".. os.date("%X") .."] received data: "..data)
 	datas = string.explode(data, "\n")
 	
 	for i, data in pairs(datas) do
@@ -58,7 +58,7 @@ function serverRecv(data, clientid)
 			print("["..clientip.."] requested player list")
 			--send players one by one to the connected player
 			for i,player in pairs(players) do
-				conn:send("addPlayer//"..i.."//"..player.x..","..player.y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"
+				conn:send("addPlayer//"..i.."//"..player.dir.."//"..player.x..","..player.y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"
 						   ..player.name.."//"..player.state.."//end\n",clientid)
 			end
 			conn:send("yourID//"..clientip.."//end\n",clientid)
@@ -114,8 +114,8 @@ function serverRecv(data, clientid)
 end
 
 function clientDC(clientid)
-	local ip, port = clientid:getpeername()
-	clientip = ip .. ":" .. port
+	--local ip, port = clientid:getpeername()
+	clientip = clientid--ip .. ":" .. port
 	print("["..clientip.."] disconnected")
 	numConnected = numConnected + 1
 	players[clientip] = nil

@@ -16,6 +16,8 @@ function Enemy:new(_x, _y, _color, _name, _state)
 		trails = {}
 	}	
 	
+	print(_x)
+	
 	setmetatable(object, { __index = Enemy })
 	return object
 end
@@ -53,6 +55,10 @@ end
 
 function Enemy:updateTrail(ct, trail)
 	self.trails[ct] = trail
+end
+
+function Enemy:updateDirection(_dir)
+	self.dir= _dir
 end
 
 function Enemy:draw()

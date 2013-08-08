@@ -154,7 +154,7 @@ end
 function connectToServer()
 	local host = "lorencs.no-ip.org"
 		
-	conn = lube.tcpClient()
+	conn = lube.udpClient()
 	conn.handshake = "test handshake"
 	conn:setPing(true, 1, "pingtest//end\n")
 	assert(conn:connect(host, 25565, true))
@@ -163,7 +163,7 @@ function connectToServer()
 end
 
 function clientRecv(data)
-	--print("[".. os.date("%X") .."]received data: "..data)
+	print("[".. os.date("%X") .."]received data: "..data)
 	
 	if partialMsg ~= "" then
 		print("concatenated partial msg '" .. partialMsg .."' with data '" .. data .."'")
@@ -185,18 +185,20 @@ function clientRecv(data)
 		
 		if data[1] == "addPlayer" then
 			
-			local clientid, x, y, r, g, b, name, state
+			local clientid, dir, x, y, r, g, b, name, state
 			clientid = data[2]
 			pos = string.explode(data[3], ",")
-			x = pos[1]
-			y = pos[2]
+			x = tonumber(pos[1])
+			y = tonumber(pos[2])
 			color = string.explode(data[4], ",")
 			name = data[5]
 			state = data[6]
 			
 			if clientid ~= myID then
 				print("adding player to list")
+				print(x)
 				local newPlayer = Enemy:new(x,y,color,name,state)
+				newPlayer:updateDirection(dir)
 				players[clientid] = newPlayer
 				playerCount = playerCount + 1
 			end
@@ -211,8 +213,8 @@ function clientRecv(data)
 			playerCount = playerCount - 1
 		elseif data[1] == "updatePos" then
 			local clientid = data[2]
-			local x = data[3]
-			local y = data[4]
+			local x = tonumber(data[3])
+			local y = tonumber(data[4])
 			
 			if clientid ~= myID then
 				players[clientid]:updatePos(x,y)
@@ -226,11 +228,11 @@ function clientRecv(data)
 			end
 		elseif data[1] == "updateTrail" then
 			local clientid = data[2]
-			local ct = data[3]
-			local x1 = data[4]
-			local y1 = data[5]
-			local x2 = data[6]
-			local y2 = data[7]
+			local ct = tonumber(data[3])
+			local x1 = tonumber(data[4])
+			local y1 = tonumber(data[5])
+			local x2 = tonumber(data[6])
+			local y2 = tonumber(data[7])
 			local dir = data[8]
 			
 			if clientid ~= myID then

@@ -37,10 +37,34 @@ function Player:update(dt)
 	self.trails[self.curTrail][3] = self.x
 	self.trails[self.curTrail][4] = self.y	
 	
-	if (self.x < 0 or self.x > winX or self.y < 0 or self.y > winY) then
+	--[[if (self.x < 0 or self.x > winX or self.y < 0 or self.y > winY) then
 		print("die")
 		subState = "spawning"
 		conn:send("updateState//spawning//end\n")
+	end]]--
+	
+	if (self.x < 0) then
+		self.x = winX
+		self.curTrail = self.curTrail + 1
+		self.trails[self.curTrail] = {winX, self.y, self.x+0.1, self.y+0.1, self.dir}
+	end
+	
+	if (self.x > winX) then
+		self.x = 0
+		self.curTrail = self.curTrail + 1
+		self.trails[self.curTrail] = {0, self.y, self.x+0.1, self.y+0.1, self.dir}
+	end
+	
+	if (self.y < 0) then
+		self.y = winY
+		self.curTrail = self.curTrail + 1
+		self.trails[self.curTrail] = {self.x, winY, self.x+0.1, self.y+0.1, self.dir}
+	end
+	
+	if (self.y > winY) then
+		self.y = 0
+		self.curTrail = self.curTrail + 1
+		self.trails[self.curTrail] = {self.x, 0, self.x+0.1, self.y+0.1, self.dir}
 	end
 	
 	--check collision with self
@@ -87,28 +111,28 @@ function Player:keypressed(key, unicode)
 		self.dir = "N"
 		conn:send("updateDirection//N//end\n")
 		self.curTrail = self.curTrail + 1
-		player.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
+		self.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
 	end
 	
 	if (key == "right" or key == "d") and (self.dir == "N" or self.dir == "S") then
 		self.dir = "E"
 		conn:send("updateDirection//E//end\n")
 		self.curTrail = self.curTrail + 1
-		player.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
+		self.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
 	end
 	
 	if (key == "down" or key == "s") and (self.dir == "E" or self.dir == "W") then
 		self.dir = "S"
 		conn:send("updateDirection//S//end\n")
 		self.curTrail = self.curTrail + 1
-		player.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
+		self.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
 	end
 	
 	if (key == "left" or key == "a") and (self.dir == "N" or self.dir == "S") then
 		self.dir = "W"
 		conn:send("updateDirection//W//end\n")
 		self.curTrail = self.curTrail + 1
-		player.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
+		self.trails[self.curTrail] = {self.x,self.y,self.x+0.001,self.y+0.001, self.dir}
 	end
 end
 
