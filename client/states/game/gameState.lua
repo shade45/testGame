@@ -144,7 +144,7 @@ function GameState:mousereleased(x, y, button)
 		player.curTrail = 1
 		player.trails = {}
 		player.trails[1] = {x,y,x,y, player.dir}
-		conn:send("addSelf//"..x..","..y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"..player.name.."//"..player.state.."//end\n")
+		conn:send("addSelf//"..player.dir.."//"..x..","..y.."//"..player.color[1]..","..player.color[2]..","..player.color[3].."//"..player.name.."//"..player.state.."//end\n")
 		
 		subState = "playing"
 		love.mouse.setVisible(true)
@@ -195,11 +195,8 @@ function clientRecv(data)
 			name = data[6]
 			state = data[7]
 			
-			print(clientid..","..dir..","..name..","..state)
-			
 			if clientid ~= myID then
 				print("adding player to list")
-				print(x)
 				local newPlayer = Enemy:new(x,y,color,name,state)
 				newPlayer:updateDirection(dir)
 				players[clientid] = newPlayer

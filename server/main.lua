@@ -66,17 +66,18 @@ function serverRecv(data, clientid)
 		elseif data[1] == "addSelf" then
 			print("["..clientip.."] adding self to players")
 			--add player to list, send to everyone
-			local x, y, r, g, b, name, state
-			pos = string.explode(data[2], ",")
+			local dir, x, y, r, g, b, name, state
+			dir = data[2]
+			pos = string.explode(data[3], ",")
 			x = pos[1]
 			y = pos[2]
-			color = string.explode(data[3], ",")
-			name = data[4]
-			state = data[5]
+			color = string.explode(data[4], ",")
+			name = data[5]
+			state = data[6]
 			
 			local newPlayer = Player:new(x,y,color,name,state)
 			players[clientip] = newPlayer
-			conn:send("addPlayer//"..clientip.."//"..x..","..y.."//"..color[1]..","..color[2]..","..color[3].."//"..name.."//"..state.."//end\n")
+			conn:send("addPlayer//"..clientip.."//"..dir.."//"..x..","..y.."//"..color[1]..","..color[2]..","..color[3].."//"..name.."//"..state.."//end\n")
 		elseif data[1] == "updatePos" then
 			local x = data[2]
 			local y = data[3]
